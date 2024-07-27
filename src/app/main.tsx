@@ -1,10 +1,10 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
-import AuthWrap from "./AuthWrap"
+import App from "./App"
 import "./index.css"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<React.StrictMode>
-		<AuthWrap/>
+		<App/>
 	</React.StrictMode>,
 )

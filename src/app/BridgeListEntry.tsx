@@ -9,7 +9,7 @@ interface BridgeEntryProps {
 	switchBridge: (server: string) => void
 }
 
-const BridgeEntry = ({ matrixClient, server, meta, switchBridge }: BridgeEntryProps) => {
+const BridgeListEntry = ({ matrixClient, server, meta, switchBridge }: BridgeEntryProps) => {
 	const onClick = useCallback(() => switchBridge(server), [server, switchBridge])
 	if (!meta.whoami) {
 		if (meta.error) {
@@ -23,4 +23,4 @@ const BridgeEntry = ({ matrixClient, server, meta, switchBridge }: BridgeEntryPr
 	</button>
 }
 
-export default BridgeEntry
+export default BridgeListEntry

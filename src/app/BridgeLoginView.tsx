@@ -93,7 +93,7 @@ const LoginStep = ({ step, onSubmit, onLoginComplete }: LoginStepProps) => {
 	}
 }
 
-const LoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewProps) => {
+const BridgeLoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewProps) => {
 	const [error, setError] = useState("")
 	const [loading, setLoading] = useState(client.loading)
 	const [step, setStep] = useState(client.step)
@@ -122,4 +122,4 @@ const LoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewProps) =
 	</div>
 }
 
-export default LoginView
+export default BridgeLoginView

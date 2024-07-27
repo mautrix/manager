@@ -1,5 +1,5 @@
 import type { RespWhoami } from "../types/whoami"
-import type { Credentials } from "./AuthWrap"
+import type { Credentials } from "./App"
 
 type BridgeStore = Record<string, RespWhoami | null>
 

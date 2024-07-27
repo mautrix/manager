@@ -1,14 +1,14 @@
 import React, { MouseEvent, useCallback, useState } from "react"
 import type { BridgeMeta } from "./bridgelist"
 import type { LoginClient } from "../api/login"
-import LoginView from "./LoginView"
+import BridgeLoginView from "./BridgeLoginView"
 
 interface BridgeViewProps {
 	bridge: BridgeMeta
 	setLoginInProgress: (inProgress: boolean) => void
 }
 
-const BridgeView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
+const BridgeStatusView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
 	const [login, setLogin] = useState<LoginClient | null>(null)
 
 	const onLoginComplete = useCallback(() => {
@@ -59,7 +59,7 @@ const BridgeView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
 				<button data-login-id={login.id} onClick={doLogout}>Logout</button>
 			</li>)}
 		</ul>
-		{login && <LoginView
+		{login && <BridgeLoginView
 			key={login.loginID}
 			client={login}
 			onLoginCancel={onLoginCancel}
@@ -68,4 +68,4 @@ const BridgeView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
 	</div>
 }
 
-export default BridgeView
+export default BridgeStatusView
