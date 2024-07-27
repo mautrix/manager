@@ -18,7 +18,8 @@ const LoginScreen = ({
 	const [loginFlows, setLoginFlows] = useState<Set<string> | null>(null)
 	const forceResolveImmediate = useRef(true)
 
-	const login = useCallback(() => {
+	const login = useCallback((evt: React.FormEvent) => {
+		evt.preventDefault()
 		matrixClient.login({
 			type: "m.login.password",
 			identifier: {
@@ -92,7 +93,7 @@ const LoginScreen = ({
 					setLoginFlows(null)
 				}}
 			/>
-			{loginFlows?.has("m.login.password") && <>
+			{loginFlows?.has("m.login.password") && <form onSubmit={login}>
 				<input
 					type="text"
 					id="username"
@@ -105,8 +106,8 @@ const LoginScreen = ({
 					value={password}
 					onChange={evt => setPassword(evt.target.value)}
 				/>
-				<button onClick={login}>Login</button>
-			</>}
+				<button type="submit">Login</button>
+			</form>}
 			{loginFlows?.has("m.login.sso") && <>
 				<button onClick={loginSSO}>SSO login</button>
 			</>}
