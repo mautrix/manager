@@ -21,12 +21,18 @@ export class MatrixClient extends BaseAPIClient {
 	}
 
 	get ssoRedirectURL(): string {
-		const redirectURL = new URL(window.location.toString())
-		redirectURL.hash = ""
-		redirectURL.search = ""
+		let redirectURL: string
+		if (window.mautrixAPI.isDevBuild) {
+			const wrappedRedirectURL = new URL(window.location.toString())
+			wrappedRedirectURL.hash = ""
+			wrappedRedirectURL.search = ""
+			redirectURL = wrappedRedirectURL.toString()
+		} else {
+			redirectURL = "mautrix-manager://sso"
+		}
 		const url = new URL(this.baseURL)
 		url.pathname = `${url.pathname}${this.pathPrefix}/v3/login/sso/redirect`
-		url.searchParams.set("redirectUrl", redirectURL.toString())
+		url.searchParams.set("redirectUrl", redirectURL)
 		return url.toString()
 	}
 

@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld("mautrixAPI", {
 	closeWebview: () => ipcRenderer.invoke("mautrix:close-webview"),
 	accessTokenChanged: (newDetails: AccessTokenChangedParams) =>
 		ipcRenderer.invoke("mautrix:access-token-changed", newDetails),
+	openInBrowser: (url: string) => ipcRenderer.invoke("mautrix:open-in-browser", url),
+	isDevBuild: process.env.NODE_ENV === "development",
 })
 
 declare global {
@@ -20,6 +22,8 @@ declare global {
 			openWebview: (params: LoginCookiesParams) => Promise<{ cookies: LoginCookieOutput }>
 			closeWebview: () => Promise<void>
 			accessTokenChanged: (newDetails: AccessTokenChangedParams) => Promise<void>
+			openInBrowser: (url: string) => Promise<void>
+			isDevBuild: boolean,
 		}
 	}
 }

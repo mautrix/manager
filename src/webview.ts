@@ -338,6 +338,7 @@ function openWebview(
 	const webview = new BrowserWindow({
 		parent,
 		modal: true,
+		autoHideMenuBar: true,
 		webPreferences: {
 			sandbox: true,
 			// Create a new temporary session for each webview

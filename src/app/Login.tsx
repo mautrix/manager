@@ -32,7 +32,8 @@ const LoginScreen = ({
 		)
 	}, [username, password, onLoggedIn, matrixClient])
 	const loginSSO = useCallback(() => {
-		window.location.href = matrixClient.ssoRedirectURL
+		window.mautrixAPI.openInBrowser(matrixClient.ssoRedirectURL)
+			.catch(err => window.alert(`Failed to open SSO URL in browser: ${err}`))
 	}, [matrixClient])
 
 	const resolveHomeserver = useCallback(() => {
