@@ -339,6 +339,7 @@ function openWebview(
 		parent,
 		modal: true,
 		autoHideMenuBar: true,
+		icon: "icon.png",
 		webPreferences: {
 			sandbox: true,
 			// Create a new temporary session for each webview

@@ -16,6 +16,7 @@ const config: ForgeConfig = {
 				schemes: ["mautrix-manager"],
 			},
 		],
+		icon: "icon",
 	},
 	rebuildConfig: {},
 	makers: [
@@ -25,6 +26,7 @@ const config: ForgeConfig = {
 		new MakerDeb({
 			options: {
 				mimeType: ["x-scheme-handler/mautrix-manager"],
+				icon: "icon.png",
 			},
 		}),
 	],
