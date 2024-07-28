@@ -5,8 +5,6 @@ An Electron app to help with logging into bridges.
 Matrix room: [#manager:maunium.net](https://matrix.to/#/#manager:maunium.net)
 
 ## Auto-configuration
-TODO: adding URLs inside mautrix-manager doesn't exist yet.  
-
 You can always add bridge URLs inside mautrix-manager, but to make setup easier
 for users, the server admin can configure a `.well-known` file which is used to
 auto-discover available bridges.
@@ -21,7 +19,7 @@ like this:
 {
   "fi.mau.bridges": [
     "https://bridges.example.com/signal",
-    "https://bridges.example.com/slack",
+    "https://bridges.example.com/slack"
   ]
 }
 ```

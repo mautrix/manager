@@ -68,7 +68,7 @@ export class BridgeList {
 		}
 	}
 
-	private add(server: string, whoami?: RespWhoami | null, external = false) {
+	private add(server: string, whoami?: RespWhoami | null, external = false, refresh = true) {
 		if (this.bridges[server]) {
 			return false
 		}
@@ -77,7 +77,7 @@ export class BridgeList {
 		)
 		this.bridges[server] = new BridgeMeta(
 			server,
-			true,
+			refresh,
 			provisioningClient,
 			updatedBridge => {
 				this.bridges[server] = updatedBridge
@@ -85,7 +85,11 @@ export class BridgeList {
 			},
 			whoami ?? undefined,
 		)
-		this.bridges[server].refresh()
+		if (refresh) {
+			this.bridges[server].refresh()
+		} else {
+			this.onChange()
+		}
 		return true
 	}
 
@@ -96,6 +100,14 @@ export class BridgeList {
 		if (changed) {
 			this.onChange()
 		}
+	}
+
+	checkAndAdd = async (server: string, external = false) => {
+		const provisioningClient = new ProvisioningClient(
+			server, this.matrixClient, external,
+		)
+		const whoami = await provisioningClient.whoami()
+		this.add(server, whoami, external, false)
 	}
 
 	delete = (...servers: string[]) => {
