@@ -1,6 +1,6 @@
 import React, { MouseEvent, useCallback, useState } from "react"
-import type { BridgeMeta } from "./bridgelist"
-import type { LoginClient } from "../api/login"
+import type { BridgeMeta } from "../api/bridgelist"
+import type { LoginClient } from "../api/loginclient"
 import BridgeLoginView from "./BridgeLoginView"
 
 interface BridgeViewProps {

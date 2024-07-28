@@ -1,5 +1,5 @@
 import type { RespWhoami } from "../types/whoami"
-import type { Credentials } from "./App"
+import type { Credentials } from "../app/App"
 
 type BridgeStore = Record<string, { external: boolean, whoami?: RespWhoami}>
 

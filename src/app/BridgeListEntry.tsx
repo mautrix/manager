@@ -1,6 +1,6 @@
 import React, { useCallback } from "react"
-import type { BridgeMeta } from "./bridgelist"
-import type { MatrixClient } from "../api/matrix"
+import type { BridgeMeta } from "../api/bridgelist"
+import type { MatrixClient } from "../api/matrixclient"
 
 interface BridgeEntryProps {
 	matrixClient: MatrixClient

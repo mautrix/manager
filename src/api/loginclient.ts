@@ -1,6 +1,6 @@
 import type { LoginStepData } from "../types/loginstep"
 import type { RespSubmitLogin } from "../types/login"
-import type { ProvisioningClient } from "./client"
+import type { ProvisioningClient } from "./provisionclient"
 
 export class LoginClient {
 	public readonly loginID: string

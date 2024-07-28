@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react"
 import type { LoginInputDataField, LoginInputFieldType, LoginStepData } from "../types/loginstep"
+import type { LoginClient } from "../api/loginclient"
 import { QRCodeSVG } from "qrcode.react"
-import { LoginClient } from "../api/login"
 
 interface LoginViewProps {
 	client: LoginClient
