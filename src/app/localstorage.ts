@@ -1,7 +1,7 @@
 import type { RespWhoami } from "../types/whoami"
 import type { Credentials } from "./App"
 
-type BridgeStore = Record<string, RespWhoami | null>
+type BridgeStore = Record<string, { external: boolean, whoami?: RespWhoami}>
 
 export default class TypedLocalStorage {
 	static get bridges(): BridgeStore {

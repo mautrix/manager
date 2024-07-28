@@ -1,25 +1,35 @@
 import type { RespWhoami } from "../types/whoami"
 import type { RespLoginFlows, RespLogout, RespSubmitLogin } from "../types/login"
-import type { LoginStepData } from "../types/loginstep"
 import type { RespGetContactList, RespResolveIdentifier, RespStartChat } from "../types/startchat"
+import type { MatrixClient } from "./matrix"
 import { LoginClient } from "./login"
 import { BaseAPIClient } from "./base"
 
 export class ProvisioningClient extends BaseAPIClient {
-	declare readonly token: string
 	declare readonly userID: string
 
 	constructor(
 		baseURL: string,
-		userID: string,
-		token: string,
+		readonly matrixClient: MatrixClient,
+		readonly external: boolean,
 		loginID?: string,
 	) {
-		super( baseURL, "/_matrix/provision", userID, token, loginID)
+		if (!matrixClient.userID) {
+			throw new Error("MatrixClient must be logged in")
+		}
+		super(baseURL, "/_matrix/provision", matrixClient.userID, undefined, loginID)
+	}
+
+	getToken(): Promise<string | undefined> {
+		if (this.external) {
+			return this.matrixClient?.getCachedOpenIDToken()
+		} else {
+			return this.matrixClient?.getToken()
+		}
 	}
 
 	withLogin(loginID: string): ProvisioningClient {
-		return new ProvisioningClient(this.baseURL, this.userID, this.token, loginID)
+		return new ProvisioningClient(this.baseURL, this.matrixClient, this.external, loginID)
 	}
 
 	whoami(signal?: AbortSignal): Promise<RespWhoami> {
@@ -52,5 +62,4 @@ export class ProvisioningClient extends BaseAPIClient {
 	startChat(identifier: string): Promise<RespStartChat> {
 		return this.request("POST", `/v3/create_dm/${encodeURIComponent(identifier)}`, {})
 	}
-
 }

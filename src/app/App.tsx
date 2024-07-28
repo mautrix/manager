@@ -49,6 +49,7 @@ const App = () => {
 		setIsLoggedIn(true)
 	}, [setCredentials, setHomeserverURL])
 	const logout = useCallback(() => {
+		TypedLocalStorage.bridges = {}
 		matrixClient.logout().then(
 			() => {
 				setCredentials(null)
@@ -71,7 +72,7 @@ const App = () => {
 				onLoggedIn,
 				err => setError(`Failed to login with token: ${err}`),
 			)
-		} else if (matrixClient.token) {
+		} else if (matrixClient.hasToken) {
 			matrixClient.whoami().then(
 				() => setIsLoggedIn(true),
 				err => {

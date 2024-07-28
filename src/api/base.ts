@@ -8,12 +8,13 @@ export interface ExtraParams {
 export class BaseAPIClient {
 	readonly baseURL: string
 	readonly pathPrefix: string
+	protected readonly staticToken: string | undefined
 
 	constructor(
 		baseURL: string,
 		pathPrefix: string,
 		readonly userID?: string,
-		readonly token?: string,
+		token?: string,
 		readonly loginID?: string,
 	) {
 		if (!baseURL.endsWith("/")) {
@@ -27,6 +28,11 @@ export class BaseAPIClient {
 		}
 		this.pathPrefix = pathPrefix
 		this.baseURL = baseURL
+		this.staticToken = token
+	}
+
+	async getToken(): Promise<string | undefined> {
+		return this.staticToken
 	}
 
 	async request<ResponseType>(
@@ -59,9 +65,11 @@ export class BaseAPIClient {
 		const reqParams: RequestInit & { headers: Record<string, string> } = {
 			method,
 			headers: {},
+			signal: extraParams?.signal,
 		}
-		if (this.token) {
-			reqParams.headers.Authorization = `Bearer ${this.token}`
+		const token = await this.getToken()
+		if (token) {
+			reqParams.headers.Authorization = `Bearer ${token}`
 		}
 		if (reqData) {
 			reqParams.body = JSON.stringify(reqData)

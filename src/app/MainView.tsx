@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import type { MatrixClient } from "../api/matrix"
+import { BridgeList, BridgeMap } from "./bridgelist"
 import BridgeListEntry from "./BridgeListEntry"
 import BridgeStatusView from "./BridgeStatusView"
-import useBridgeList from "./bridgelist"
 
 interface MainScreenProps {
 	matrixClient: MatrixClient
@@ -10,9 +10,15 @@ interface MainScreenProps {
 }
 
 const MainView = ({ matrixClient, logout }: MainScreenProps) => {
-	const { bridges } = useBridgeList(matrixClient)
+	const bridgeList = useMemo(() => new BridgeList(matrixClient), [matrixClient])
+	const [bridges, setBridges] = useState<BridgeMap>({})
 	const [viewingBridge, setViewingBridge] = useState("")
 	const [loginInProgress, setLoginInProgress] = useState<boolean>(false)
+	useEffect(() => {
+		bridgeList.listen(setBridges)
+		bridgeList.initialLoad()
+		return () => bridgeList.stopListen(setBridges)
+	}, [bridgeList])
 
 	const switchBridge = useCallback((server: string) => {
 		if (loginInProgress) {

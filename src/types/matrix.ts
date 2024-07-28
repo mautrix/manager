@@ -72,6 +72,7 @@ export interface RespClientWellKnown {
 
 export interface RespMautrixWellKnown {
 	"fi.mau.bridges"?: string[]
+	"fi.mau.external_bridge_servers"?: string[]
 }
 
 export interface RespLogin {

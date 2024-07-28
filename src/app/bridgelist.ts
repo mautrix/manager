@@ -1,10 +1,8 @@
-import { useCallback, useReducer } from "react"
-import { RespWhoami } from "../types/whoami"
+import type { MatrixClient } from "../api/matrix"
+import type { RespMautrixWellKnown } from "../types/matrix"
+import type { RespWhoami } from "../types/whoami"
 import { ProvisioningClient } from "../api/client"
 import TypedLocalStorage from "./localstorage"
-import type { MatrixClient } from "../api/matrix"
-import useInit from "../util/useInit"
-import type { RespMautrixWellKnown } from "../types/matrix"
 
 export class BridgeMeta {
 	constructor(
@@ -14,7 +12,8 @@ export class BridgeMeta {
 		public updateState: (bridge: BridgeMeta) => void,
 		public whoami?: RespWhoami,
 		public error?: Error,
-	) {}
+	) {
+	}
 
 	clone = ({ whoami, error, refreshing }: {
 		whoami?: RespWhoami | null,
@@ -54,84 +53,120 @@ export class BridgeMeta {
 	}
 }
 
-export type BridgeList = Record<string, BridgeMeta>
+export type BridgeMap = Record<string, BridgeMeta>
+export type BridgeListChangeListener = (bridges: BridgeMap) => void
 
-type SetBridges = {
-	add?: BridgeList
-	overwrite?: BridgeList
-	delete?: string[]
-}
+export class BridgeList {
+	bridges: BridgeMap
+	changeListener: BridgeListChangeListener | undefined
+	private initialLoadDone = false
 
-function reduceBridges(bridges: BridgeList, bridgeChanges: SetBridges): BridgeList {
-	const newBridges = { ...bridges, ...bridgeChanges.overwrite }
-	if (bridgeChanges.add) {
-		for (const [server, bridge] of Object.entries(bridgeChanges.add)) {
-			if (!Object.prototype.hasOwnProperty.call(newBridges, server)) {
-				newBridges[server] = bridge
-				bridge.refresh()
-			}
+	constructor(private matrixClient: MatrixClient) {
+		this.bridges = {}
+		for (const [server, { external, whoami }] of Object.entries(TypedLocalStorage.bridges)) {
+			this.add(server, whoami, external)
 		}
 	}
-	if (bridgeChanges.delete) {
-		for (const server of bridgeChanges.delete) {
-			delete newBridges[server]
-		}
-	}
-	TypedLocalStorage.bridges = Object.fromEntries(
-		Object.entries(newBridges).map(([server, bridge]) => [server, bridge.whoami ?? null]),
-	)
-	return newBridges
-}
 
-export default function useBridgeList(matrixClient: MatrixClient) {
-	const [bridges, setBridges] = useReducer(reduceBridges, {})
-	const setBridge = useCallback((bridge: BridgeMeta) => {
-		setBridges({
-			overwrite: {
-				[bridge.server]: bridge,
-			},
-		})
-	}, [])
-	const newBridgeMeta = useCallback((
-		server: string, whoami?: RespWhoami | null, refreshing = false,
-	) => {
-		return new BridgeMeta(
+	private add(server: string, whoami?: RespWhoami | null, external = false) {
+		if (this.bridges[server]) {
+			return false
+		}
+		const provisioningClient = new ProvisioningClient(
+			server, this.matrixClient, external,
+		)
+		this.bridges[server] = new BridgeMeta(
 			server,
-			refreshing,
-			new ProvisioningClient(server, matrixClient.userID!, matrixClient.token!),
-			setBridge,
+			true,
+			provisioningClient,
+			updatedBridge => {
+				this.bridges[server] = updatedBridge
+				this.onChange()
+			},
 			whoami ?? undefined,
 		)
-	}, [matrixClient, setBridge])
-	const deleteBridges = useCallback((...bridges: string[]) => {
-		setBridges({ delete: bridges })
-	}, [])
-	const addBridges = useCallback((...newBridgeList: string[]) => {
-		const newBridgeMap: BridgeList = Object.fromEntries(newBridgeList.map(server =>
-			[server, newBridgeMeta(server,null, true)]))
-		setBridges({ add: newBridgeMap })
-	}, [newBridgeMeta])
-	useInit(() => {
-		const initialBridges = Object.fromEntries(Object.entries(TypedLocalStorage.bridges)
-			.map(([server, whoami]) => [server, newBridgeMeta(server, whoami, true)]))
-		setBridges({ add: initialBridges })
+		this.bridges[server].refresh()
+		return true
+	}
 
-		const match = /@.*:(.*)/.exec(matrixClient.userID!)
-		if (!match) {
+	addMany = (servers: string[], external = false) => {
+		const changed = servers
+			.map(server => this.add(server, undefined, external))
+			.some(x => x)
+		if (changed) {
+			this.onChange()
+		}
+	}
+
+	delete = (...servers: string[]) => {
+		let changed = false
+		for (const server of servers) {
+			if (this.bridges[server]) {
+				changed = true
+				delete this.bridges[server]
+			}
+		}
+		if (changed) {
+			this.onChange()
+		}
+	}
+
+	initialLoad = () => {
+		if (this.initialLoadDone) {
 			return
 		}
-		fetch(`https://${match[1]}/.well-known/matrix/mautrix`)
+		this.initialLoadDone = true
+		this.refreshWellKnown()
+	}
+
+	private refreshWellKnown(server?: string) {
+		let isExternal = true
+		if (server === undefined) {
+			const match = /@.*:(.*)/.exec(this.matrixClient.userID!)
+			if (!match) {
+				return
+			}
+			server = match[1]
+			isExternal = false
+		}
+		console.info(`Fetching bridge list from .well-known of ${server}`)
+		fetch(`https://${server}/.well-known/matrix/mautrix`)
 			.then(resp => resp.json())
 			.then((resp: RespMautrixWellKnown) => {
-				const bridges = resp?.["fi.mau.bridges"]?.filter?.(br => typeof br === "string")
+				const bridges = resp?.["fi.mau.bridges"]
+					?.filter?.(br => typeof br === "string")
 				if (bridges) {
-					addBridges(...bridges)
+					this.addMany(bridges, isExternal)
+				}
+				const externalServers = resp?.["fi.mau.external_bridge_servers"]
+					?.filter?.(br => typeof br === "string")
+				if (!isExternal && externalServers) {
+					for (const extServer of externalServers) {
+						this.refreshWellKnown(extServer)
+					}
 				}
 			})
-			.catch(err => console.error("Failed to fetch bridge list from .well-known:", err))
-	})
+			.catch(err => {
+				console.error(`Failed to fetch bridge list from .well-known of ${server}:`, err)
+			})
+	}
 
-	return {
-		bridges, setBridges, addBridges, deleteBridges,
-	} as const
+	listen = (listener: BridgeListChangeListener) => {
+		this.changeListener = listener
+		listener({ ...this.bridges })
+	}
+
+	stopListen = (listener: BridgeListChangeListener) => {
+		if (this.changeListener === listener) {
+			this.changeListener = undefined
+		}
+	}
+
+	private onChange() {
+		TypedLocalStorage.bridges = Object.fromEntries(
+			Object.entries(this.bridges).map(([server, bridge]) =>
+				[server, { whoami: bridge.whoami, external: bridge.client.external }]),
+		)
+		this.changeListener?.({ ...this.bridges })
+	}
 }

@@ -6,7 +6,6 @@ Matrix room: [#manager:maunium.net](https://matrix.to/#/#manager:maunium.net)
 
 ## Auto-configuration
 TODO: adding URLs inside mautrix-manager doesn't exist yet.  
-TODO 2: discovering and authenticating with external server bridges doesn't exist yet.
 
 You can always add bridge URLs inside mautrix-manager, but to make setup easier
 for users, the server admin can configure a `.well-known` file which is used to

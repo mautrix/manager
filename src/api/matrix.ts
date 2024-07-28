@@ -1,9 +1,22 @@
 import { BaseAPIClient } from "./base"
-import { ReqLogin, RespLogin, RespLoginFlows, RespVersions, RespWhoami } from "../types/matrix"
+import {
+	ReqLogin,
+	RespLogin,
+	RespLoginFlows,
+	RespOpenIDToken,
+	RespVersions,
+	RespWhoami,
+} from "../types/matrix"
 
 const mxcRegex = /^mxc:\/\/([^/]+?)\/([a-zA-Z0-9_-]+)$/
 
+type OpenIDTokenCache = RespOpenIDToken & {
+	expires_at: number
+}
+
 export class MatrixClient extends BaseAPIClient {
+	private openIDTokenCache: Promise<OpenIDTokenCache> | undefined
+
 	constructor(
 		baseURL: string,
 		userID?: string,
@@ -18,6 +31,10 @@ export class MatrixClient extends BaseAPIClient {
 
 	whoami(): Promise<RespWhoami> {
 		return this.request("GET", "/v3/account/whoami")
+	}
+
+	get hasToken(): boolean {
+		return !!this.staticToken
 	}
 
 	get ssoRedirectURL(): string {
@@ -56,5 +73,26 @@ export class MatrixClient extends BaseAPIClient {
 
 	logout(): Promise<Record<string, never>> {
 		return this.request("POST", "/v3/logout", {})
+	}
+
+	async getCachedOpenIDToken(): Promise<string> {
+		const cache = await this.openIDTokenCache
+		if (cache && cache.expires_at > Date.now()) {
+			return cache.access_token
+		}
+		this.openIDTokenCache = this.getOpenIDToken().then(resp => ({
+			...resp,
+			access_token: `openid:${resp.access_token}`,
+			expires_at: Date.now() + (resp.expires_in / 60 * 59000),
+		}), err => {
+			console.error("Failed to get OpenID token", err)
+			this.openIDTokenCache = undefined
+			throw err
+		})
+		return this.openIDTokenCache.then(res => res.access_token)
+	}
+
+	getOpenIDToken(): Promise<RespOpenIDToken> {
+		return this.request("POST", `/v3/user/${this.userID}/openid/request_token`, {})
 	}
 }
