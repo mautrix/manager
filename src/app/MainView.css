@@ -5,6 +5,13 @@ main.main-view {
 		"header header" 3rem
 		"sidebar content" 1fr
 		/ 15rem 1fr;
+
+	position: absolute;
+	overflow: hidden;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
 main.main-view > div.logged-in-as {
@@ -30,9 +37,11 @@ main.main-view > div.logged-in-as {
 
 main.main-view > div.bridge-view {
 	grid-area: content;
+	overflow: auto;
 }
 
 main.main-view > div.bridge-list {
+	overflow-y: auto;
 	grid-area: sidebar;
 
 	> .bridge-list-entry {
