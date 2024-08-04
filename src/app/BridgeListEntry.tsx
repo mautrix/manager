@@ -17,7 +17,7 @@ const BridgeListEntry = (
 	const className = "bridge-list-entry" + (active ? " active" : "")
 	if (!meta.whoami) {
 		if (meta.error) {
-			return <div className={className} title={meta.error.message}>{server} ❌</div>
+			return <div className={className} title={meta.error.message}>{meta.server} ❌</div>
 		}
 		return <div className={className}>Loading {meta.server}...</div>
 	}
