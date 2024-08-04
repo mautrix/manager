@@ -2,6 +2,10 @@ import type { LoginStepData } from "../types/loginstep"
 import type { RespSubmitLogin } from "../types/login"
 import type { ProvisioningClient } from "./provisionclient"
 
+const baseChromeUserAgent = window.navigator.userAgent
+	.replace(/ mautrix-manager\/\S+/, "")
+	.replace(/ Electron\/\S+/, "")
+
 export class LoginClient {
 	public readonly loginID: string
 	#step: LoginStepData
@@ -79,6 +83,9 @@ export class LoginClient {
 			const closeWebview = () => window.mautrixAPI.closeWebview()
 			const removeListener = () => this.abortController.signal.removeEventListener("abort", closeWebview)
 			this.abortController.signal.addEventListener("abort", closeWebview)
+			if (!this.#step.cookies.user_agent) {
+				this.#step.cookies.user_agent = baseChromeUserAgent
+			}
 			window.mautrixAPI.openWebview(this.#step.cookies).then(
 				res => this.submitCookies(res.cookies),
 				this.onError,
