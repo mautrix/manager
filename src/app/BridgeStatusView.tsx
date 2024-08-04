@@ -3,12 +3,13 @@ import type { BridgeMeta } from "../api/bridgelist"
 import type { LoginClient } from "../api/loginclient"
 import type { RespWhoamiLogin } from "../types/whoami"
 import type { MatrixClient } from "../api/matrixclient"
+import type { LoginInProgress } from "./MainView"
 import BridgeLoginView from "./BridgeLoginView"
 import "./BridgeStatusView.css"
 
 interface BridgeViewProps {
 	bridge: BridgeMeta
-	setLoginInProgress: (inProgress: boolean) => void
+	setLoginInProgress: (login: LoginInProgress | null) => void
 }
 
 interface UserLoginViewProps {
@@ -33,7 +34,8 @@ const UserLoginView = ({ login, mxClient, doLogout }: UserLoginViewProps) => {
 				</span>
 				{login.state_event === "BAD_CREDENTIALS" &&
 					<button className="relogin" data-login-id={login.id}>Relogin</button>}
-				<button className="logout" data-login-id={login.id} onClick={doLogout}>Logout</button>
+				<button className="logout" data-login-id={login.id} onClick={doLogout}>Logout
+				</button>
 			</div>
 		</div>
 		<pre className={`details ${expandDetails ? "" : "hidden"}`}>
@@ -49,11 +51,11 @@ const BridgeStatusView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
 	const onLoginComplete = useCallback(() => {
 		setTimeout(bridge.refresh, 500)
 		setLogin(null)
-		setLoginInProgress(false)
+		setLoginInProgress(null)
 	}, [setLoginInProgress, bridge])
 	const onLoginCancel = useCallback(() => {
 		setLogin(null)
-		setLoginInProgress(false)
+		setLoginInProgress(null)
 	}, [setLoginInProgress])
 
 	const startLogin = useCallback((evt: MouseEvent<HTMLButtonElement>) => {
@@ -61,7 +63,15 @@ const BridgeStatusView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
 		bridge.client.startLogin(
 			evt.currentTarget.getAttribute("data-flow-id")!,
 			bridge.refresh,
-		).then(setLogin)
+		).then(login => {
+			setLogin(login)
+			setLoginInProgress({
+				cancel: () => {
+					login.cancel()
+					setLogin(null)
+				},
+			})
+		})
 	}, [setLogin, bridge])
 	const doLogout = useCallback((evt: MouseEvent<HTMLButtonElement>) => {
 		const loginID = evt.currentTarget.getAttribute("data-login-id")!

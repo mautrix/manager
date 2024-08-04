@@ -7,14 +7,18 @@ import "./MainView.css"
 
 interface MainScreenProps {
 	matrixClient: MatrixClient
-	logout: () => void,
+	logout: () => void
+}
+
+export interface LoginInProgress {
+	cancel: () => void
 }
 
 const MainView = ({ matrixClient, logout }: MainScreenProps) => {
 	const bridgeList = useMemo(() => new BridgeList(matrixClient), [matrixClient])
 	const [bridges, setBridges] = useState<BridgeMap>({})
 	const [viewingBridge, setViewingBridge] = useState("")
-	const [loginInProgress, setLoginInProgress] = useState<boolean>(false)
+	const [loginInProgress, setLoginInProgress] = useState<LoginInProgress | null>(null)
 	useEffect(() => {
 		bridgeList.listen(setBridges)
 		bridgeList.initialLoad()
@@ -27,6 +31,8 @@ const MainView = ({ matrixClient, logout }: MainScreenProps) => {
 			if (!cancel) {
 				return
 			}
+			loginInProgress.cancel()
+			setLoginInProgress(null)
 		}
 		setViewingBridge(server)
 	}, [loginInProgress])
