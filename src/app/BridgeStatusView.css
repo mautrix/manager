@@ -8,6 +8,10 @@ div.bridge-view {
 		padding: .25rem .5rem;
 		box-sizing: border-box;
 	}
+
+	&.hidden {
+		display: none;
+	}
 }
 
 div.user-login-entry:hover {

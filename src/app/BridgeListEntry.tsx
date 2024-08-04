@@ -4,7 +4,6 @@ import type { MatrixClient } from "../api/matrixclient"
 
 interface BridgeEntryProps {
 	matrixClient: MatrixClient
-	server: string
 	meta: BridgeMeta
 	switchBridge: (server: string) => void
 	active: boolean
@@ -12,17 +11,17 @@ interface BridgeEntryProps {
 }
 
 const BridgeListEntry = (
-	{ matrixClient, server, meta, switchBridge, active, showBotMXID }: BridgeEntryProps,
+	{ matrixClient, meta, switchBridge, active, showBotMXID }: BridgeEntryProps,
 ) => {
-	const onClick = useCallback(() => switchBridge(server), [server, switchBridge])
+	const onClick = useCallback(() => switchBridge(meta.server), [meta.server, switchBridge])
 	const className = "bridge-list-entry" + (active ? " active" : "")
 	if (!meta.whoami) {
 		if (meta.error) {
 			return <div className={className} title={meta.error.message}>{server} ❌</div>
 		}
-		return <div className={className}>Loading {server}...</div>
+		return <div className={className}>Loading {meta.server}...</div>
 	}
-	return <button className={className} onClick={onClick} title={server}>
+	return <button className={className} onClick={onClick} title={meta.server}>
 		<img alt="" src={matrixClient.getMediaURL(meta.whoami.network.network_icon)}/>
 		<div className="bridge-list-name">
 			<span className="name">{meta.whoami.network.displayname}</span>

@@ -18,24 +18,12 @@ const MainView = ({ matrixClient, logout }: MainScreenProps) => {
 	const bridgeList = useMemo(() => new BridgeList(matrixClient), [matrixClient])
 	const [bridges, setBridges] = useState<BridgeMap>({})
 	const [viewingBridge, setViewingBridge] = useState("")
-	const [loginInProgress, setLoginInProgress] = useState<LoginInProgress | null>(null)
 	useEffect(() => {
 		bridgeList.listen(setBridges)
 		bridgeList.initialLoad()
 		return () => bridgeList.stopListen(setBridges)
 	}, [bridgeList])
 
-	const switchBridge = useCallback((server: string) => {
-		if (loginInProgress) {
-			const cancel = window.confirm("Cancel login?")
-			if (!cancel) {
-				return
-			}
-			loginInProgress.cancel()
-			setLoginInProgress(null)
-		}
-		setViewingBridge(server)
-	}, [loginInProgress])
 	const addBridge = useCallback((evt: React.FormEvent) => {
 		evt.preventDefault()
 		const form = evt.currentTarget as HTMLFormElement
@@ -66,13 +54,12 @@ const MainView = ({ matrixClient, logout }: MainScreenProps) => {
 			<button onClick={logout}>Logout</button>
 		</div>
 		<div className="bridge-list">
-			{Object.entries(bridges).map(([server, bridge]) => <BridgeListEntry
-				key={server}
+			{Object.values(bridges).map(bridge => <BridgeListEntry
+				key={bridge.server}
 				matrixClient={matrixClient}
-				server={server}
 				meta={bridge}
-				switchBridge={switchBridge}
-				active={viewingBridge === server}
+				switchBridge={setViewingBridge}
+				active={viewingBridge === bridge.server}
 				showBotMXID={bridgeList.hasMultiple(bridge.whoami?.network.beeper_bridge_type)}
 			/>)}
 			<form className="new-bridge" onSubmit={addBridge}>
@@ -84,10 +71,12 @@ const MainView = ({ matrixClient, logout }: MainScreenProps) => {
 				<button type="submit">Add bridge</button>
 			</form>
 		</div>
-		{viewingBridge && <BridgeStatusView
-			bridge={bridges[viewingBridge]}
-			setLoginInProgress={setLoginInProgress}
-		/>}
+		{Object.values(bridges).map(bridge =>
+			<BridgeStatusView
+				key={bridge.server}
+				hidden={viewingBridge !== bridge.server}
+				bridge={bridge}
+			/>)}
 	</main>
 }
 

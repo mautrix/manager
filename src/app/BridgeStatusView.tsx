@@ -9,7 +9,7 @@ import "./BridgeStatusView.css"
 
 interface BridgeViewProps {
 	bridge: BridgeMeta
-	setLoginInProgress: (login: LoginInProgress | null) => void
+	hidden: boolean
 }
 
 interface UserLoginViewProps {
@@ -44,34 +44,22 @@ const UserLoginView = ({ login, mxClient, doLogout }: UserLoginViewProps) => {
 	</div>
 }
 
-const BridgeStatusView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
+const BridgeStatusView = ({ bridge, hidden }: BridgeViewProps) => {
 	const mxClient = bridge.client.matrixClient
 	const [login, setLogin] = useState<LoginClient | null>(null)
 
 	const onLoginComplete = useCallback(() => {
 		setTimeout(bridge.refresh, 500)
 		setLogin(null)
-		setLoginInProgress(null)
-	}, [setLoginInProgress, bridge])
-	const onLoginCancel = useCallback(() => {
-		setLogin(null)
-		setLoginInProgress(null)
-	}, [setLoginInProgress])
+	}, [bridge])
+	const onLoginCancel = useCallback(() => setLogin(null), [])
 
 	const startLogin = useCallback((evt: MouseEvent<HTMLButtonElement>) => {
 		// TODO catch errors?
 		bridge.client.startLogin(
 			evt.currentTarget.getAttribute("data-flow-id")!,
 			bridge.refresh,
-		).then(login => {
-			setLogin(login)
-			setLoginInProgress({
-				cancel: () => {
-					login.cancel()
-					setLogin(null)
-				},
-			})
-		})
+		).then(setLogin)
 	}, [setLogin, bridge])
 	const doLogout = useCallback((evt: MouseEvent<HTMLButtonElement>) => {
 		const loginID = evt.currentTarget.getAttribute("data-login-id")!
@@ -82,7 +70,7 @@ const BridgeStatusView = ({ bridge, setLoginInProgress }: BridgeViewProps) => {
 		return <div>BridgeView spinner</div>
 	}
 
-	return <div className="bridge-view">
+	return <div className={`bridge-view ${hidden ? "hidden" : ""}`}>
 		{bridge.whoami.logins.map(login =>
 			<UserLoginView key={login.id} login={login} mxClient={mxClient} doLogout={doLogout}/>,
 		)}
