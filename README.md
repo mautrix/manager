@@ -1,6 +1,10 @@
 # mautrix-manager
 An Electron app to help with logging into bridges.
 
+All bridges using the new bridgev2 framework in mautrix-go are supported, as
+well as any bridges implementing the same provisioning API. Note that old
+mautrix bridges are not supported.
+
 ## Discussion
 Matrix room: [#manager:maunium.net](https://matrix.to/#/#manager:maunium.net)
 
