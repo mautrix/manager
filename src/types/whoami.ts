@@ -28,10 +28,22 @@ export type RemoteStateEvent =
 	"BAD_CREDENTIALS" |
 	"UNKNOWN_ERROR"
 
+export interface RemoteProfile {
+	name?: string
+	username?: string
+	phone?: string
+	email?: string
+	avatar?: string
+}
+
 export interface RespWhoamiLogin {
 	state_event: RemoteStateEvent
 	state_ts: number
+	state_reason?: string
+	state_info?: Record<string, unknown>
 	id: string
 	name: string
+	profile?: RemoteProfile
 	space_room: string
+	relogin_flow_ids?: string[]
 }

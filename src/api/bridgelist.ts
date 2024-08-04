@@ -68,6 +68,22 @@ export class BridgeList {
 		}
 	}
 
+	hasMultiple = (bridgeType?: string) => {
+		if (!bridgeType) {
+			return false
+		}
+		let count = 0
+		for (const bridge of Object.values(this.bridges)) {
+			if (bridge.whoami?.network.beeper_bridge_type === bridgeType) {
+				count++
+				if (count > 1) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
 	private add(server: string, whoami?: RespWhoami | null, external = false, refresh = true) {
 		if (this.bridges[server]) {
 			return false

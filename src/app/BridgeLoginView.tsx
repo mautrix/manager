@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react"
-import type { LoginInputDataField, LoginInputFieldType, LoginStepData } from "../types/loginstep"
+import type {
+	LoginDisplayAndWaitParams,
+	LoginInputDataField,
+	LoginInputFieldType,
+	LoginStepData,
+} from "../types/loginstep"
 import type { LoginClient } from "../api/loginclient"
 import { QRCodeSVG } from "qrcode.react"
+import GridLoader from "react-spinners/GridLoader"
+import "./BridgeLoginView.css"
 
 interface LoginViewProps {
 	client: LoginClient
@@ -12,6 +19,7 @@ interface LoginViewProps {
 interface LoginStepProps {
 	step: LoginStepData
 	onSubmit: (data: Record<string, string>) => void
+	onCancel: () => void
 	onLoginComplete: () => void
 }
 
@@ -30,19 +38,45 @@ function loginInputFieldTypeToHTMLType(type: LoginInputFieldType): string {
 }
 
 const LoginStepField = ({ field }: { field: LoginInputDataField }) => {
-	return <div>
+	return <div className="login-form-field" title={field.description}>
 		<label htmlFor={`login-form-${field.id}`}>{field.name}</label>
 		<input
 			id={`login-form-${field.id}`}
 			name={field.id}
 			type={loginInputFieldTypeToHTMLType(field.type)}
 			placeholder={field.name}
-			title={field.description}
 		/>
 	</div>
 }
 
-const LoginStep = ({ step, onSubmit, onLoginComplete }: LoginStepProps) => {
+const DisplayAndWaitStep = ({ params }: { params: LoginDisplayAndWaitParams }) => {
+	switch (params.type) {
+	case "emoji":
+		if (params.image_url) {
+			return <img
+				height={256}
+				src={params.image_url}
+				alt={params.data}
+			/>
+		} else {
+			return <h1>{params.data}</h1>
+		}
+	case "code":
+		return <h1>{params.data}</h1>
+	case "qr":
+		return <QRCodeSVG value={params.data}/>
+	case "nothing":
+		return <div>
+			<GridLoader color="var(--primary-color)"/>
+		</div>
+	default:
+		return <div>
+			Unknown display type {(params as { type: string }).type}
+		</div>
+	}
+}
+
+const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel }: LoginStepProps) => {
 	const submitForm = useCallback((evt: React.FormEvent) => {
 		evt.preventDefault()
 		const form = evt.currentTarget as HTMLFormElement
@@ -56,39 +90,28 @@ const LoginStep = ({ step, onSubmit, onLoginComplete }: LoginStepProps) => {
 	}, [onSubmit])
 	switch (step.type) {
 	case "cookies":
-		return null
+		return <div className="login-form type-cookies">
+			<button className="cancel-button" onClick={onCancel}>Cancel</button>
+		</div>
 	case "display_and_wait":
-		switch (step.display_and_wait.type) {
-		case "emoji":
-			if (step.display_and_wait.image_url) {
-				return <img
-					height={256}
-					src={step.display_and_wait.image_url}
-					alt={step.display_and_wait.data}
-				/>
-			} else {
-				return <h1>{step.display_and_wait.data}</h1>
-			}
-		case "code":
-			return <h1>{step.display_and_wait.data}</h1>
-		case "qr":
-			return <QRCodeSVG value={step.display_and_wait.data}/>
-		case "nothing":
-			return <div>Waiting...</div>
-		default:
-			return <div>
-				Unknown display type {(step.display_and_wait as { type: string }).type}
-			</div>
-		}
+		return <div className="login-form type-display-and-wait">
+			<DisplayAndWaitStep params={step.display_and_wait}/>
+			<button className="cancel-button" onClick={onCancel}>Cancel</button>
+		</div>
 	case "user_input":
-		return <form onSubmit={submitForm}>
-			{step.user_input.fields.map(field => <LoginStepField key={field.id} field={field}/>)}
-			<button type="submit">Submit</button>
+		return <form onSubmit={submitForm} className="login-form type-user-input">
+			<div className="login-form-table">
+				{step.user_input.fields.map(field =>
+					<LoginStepField key={field.id} field={field}/>)}
+			</div>
+			<div className="login-form-buttons">
+				<button className="cancel-button" onClick={onCancel}>Cancel</button>
+				<button className="submit-button" type="submit">Submit</button>
+			</div>
 		</form>
 	case "complete":
-		return <div>
-			Logged in
-			<button onClick={onLoginComplete}>Close</button>
+		return <div className="login-form type-complete">
+			<button className="close-button" onClick={onLoginComplete}>Close</button>
 		</div>
 	}
 }
@@ -112,13 +135,16 @@ const BridgeLoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewPr
 		instructionsToRender = "Please complete the login in the webview"
 	}
 
-	return <div>
-		{loading ? "Loading..." : ""}
-		<p>
+	return <div className="bridge-login-view">
+		<div className="login-instructions">
 			{error ? `Login failed :( ${error}` : instructionsToRender}
-		</p>
-		<LoginStep step={step} onSubmit={client.submitUserInput} onLoginComplete={onLoginComplete}/>
-		<button onClick={cancelLogin}>Cancel</button>
+		</div>
+		<LoginStep
+			step={step}
+			onSubmit={client.submitUserInput}
+			onLoginComplete={onLoginComplete}
+			onCancel={cancelLogin}
+		/>
 	</div>
 }
 

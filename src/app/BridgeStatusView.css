@@ -1,0 +1,140 @@
+div.bridge-view {
+	padding: .5rem;
+	display: flex;
+	flex-direction: column;
+	gap: .5rem;
+
+	> div.user-login-entry, > div.new-login, > div.bridge-login-view {
+		padding: .25rem .5rem;
+		box-sizing: border-box;
+	}
+}
+
+div.user-login-entry:hover {
+	background-color: #EEE;
+}
+
+div.new-login {
+	height: 3.5rem;
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+
+	> button {
+		border: 2px solid var(--primary-color);
+		background-color: inherit;
+		padding: 6px 1rem;
+		border-radius: .25rem;
+		box-sizing: border-box;
+		height: 2.5rem;
+
+		&:hover, &:focus {
+			background-color: var(--primary-color);
+			color: white;
+		}
+	}
+}
+
+div.user-login-entry > pre.details {
+	&.hidden {
+		display: none;
+	}
+	white-space: pre-wrap;
+	max-height: 400px;
+	overflow-y: auto;
+	margin: .5rem 0;
+}
+
+div.user-login-entry > div.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 3rem;
+
+	> div.profile, > div.controls {
+		display: flex;
+		align-items: center;
+		gap: .5rem;
+		height: 100%;
+
+		> button {
+			padding: .5rem 1rem;
+			border-radius: .25rem;
+			cursor: pointer;
+			box-sizing: border-box;
+			border: 2px solid transparent;
+		}
+
+		> button.logout {
+			border: 2px solid var(--error-color-light);
+			background-color: inherit;
+
+			&:hover, &:focus {
+				border: 2px solid transparent;
+				color: white;
+				background-color: var(--error-color);
+			}
+		}
+
+		> button.relogin {
+			color: white;
+			background-color: var(--primary-color);
+
+			&:hover, &:focus {
+				background-color: var(--primary-color-dark);
+			}
+		}
+	}
+
+	> div.profile {
+		flex-grow: 1;
+		user-select: none;
+		> img {
+			height: 2.5rem;
+			width: 2.5rem;
+			border-radius: 100%;
+		}
+	}
+
+	.login-state {
+		font-weight: bold;
+
+		&.state-connected, &.state-backfilling {
+			color: var(--primary-color);
+
+			&::before {
+				content: "✅ ";
+			}
+		}
+
+		&.state-connecting {
+			color: var(--primary-color);
+
+			&::before {
+				content: "⏳️ ";
+			}
+		}
+
+		&.state-transient-disconnect {
+			color: yellow;
+
+			&::before {
+				content: "⚠️ ";
+			}
+		}
+
+		&.state-unset {
+			&::before {
+				content: "❓️ ";
+			}
+		}
+
+		&.state-bad-credentials, &.state-unknown-error {
+			color: var(--error-color);
+
+			&::before {
+				content: "❌ ";
+			}
+		}
+	}
+}

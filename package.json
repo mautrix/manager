@@ -42,7 +42,14 @@
 	"dependencies": {
 		"electron-squirrel-startup": "^1.0.1",
 		"qrcode.react": "^3.1.0",
-		"react": "^18.3.1",
-		"react-dom": "^18.3.1"
+		"react": "19.0.0-rc-8269d55d-20240802",
+		"react-dom": "19.0.0-rc-8269d55d-20240802",
+		"react-spinners": "^0.14.1",
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
+	},
+	"overrides": {
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
 	}
 }

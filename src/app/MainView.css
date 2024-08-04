@@ -1,0 +1,94 @@
+main.main-view {
+	display: grid;
+	width: 100%;
+	grid-template:
+		"header header" 3rem
+		"sidebar content" 1fr
+		/ 15rem 1fr;
+}
+
+main.main-view > div.logged-in-as {
+	grid-area: header;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: .5rem 1rem;
+	background-color: var(--primary-color);
+	color: white;
+
+	button {
+		padding: .25rem 1rem;
+		box-sizing: border-box;
+		border: none;
+		background-color: white;
+
+		&:hover, &:focus {
+			background-color: #DDD;
+		}
+	}
+}
+
+main.main-view > div.bridge-view {
+	grid-area: content;
+}
+
+main.main-view > div.bridge-list {
+	grid-area: sidebar;
+
+	> .bridge-list-entry {
+		background-color: white;
+		display: flex;
+		align-items: center;
+		width: 100%;
+		height: 3rem;
+		gap: .25rem;
+
+		border: none;
+
+		&.active {
+			background-color: var(--primary-color-light);
+			font-weight: bold;
+		}
+
+		> img {
+			height: 2.5rem;
+		}
+
+		> div.bridge-list-name {
+			display: flex;
+			text-align: left;
+			flex-direction: column;
+
+			> small.bridge-bot-id {
+				font-weight: normal !important;
+			}
+		}
+	}
+
+	> form.new-bridge {
+		display: flex;
+		flex-direction: column;
+		gap: .5rem;
+		padding: 1rem;
+		background-color: white;
+
+		input[type="text"] {
+			padding: .5rem;
+			border: 1px solid #CCC;
+			border-radius: .25rem;
+		}
+
+		> button {
+			padding: .5rem;
+			border: none;
+			background-color: var(--primary-color);
+			color: white;
+			font-weight: bold;
+			border-radius: .25rem;
+
+			&:hover, &:focus {
+				background-color: var(--primary-color-dark);
+			}
+		}
+	}
+}

@@ -3,6 +3,7 @@ import type { MatrixClient } from "../api/matrixclient"
 import { BridgeList, BridgeMap } from "../api/bridgelist"
 import BridgeListEntry from "./BridgeListEntry"
 import BridgeStatusView from "./BridgeStatusView"
+import "./MainView.css"
 
 interface MainScreenProps {
 	matrixClient: MatrixClient
@@ -53,32 +54,35 @@ const MainView = ({ matrixClient, logout }: MainScreenProps) => {
 			})
 	}, [bridgeList])
 
-	return <div>
-		Logged in as {matrixClient.userID}
-		<br/>
-		{Object.entries(bridges).map(([server, bridge]) => <BridgeListEntry
-			key={server}
-			matrixClient={matrixClient}
-			server={server}
-			meta={bridge}
-			switchBridge={switchBridge}
-		/>)}
-		<br/>
+	return <main className="main-view">
+		<div className="logged-in-as">
+			<span>Logged in as <code>{matrixClient.userID}</code></span>
+			<button onClick={logout}>Logout</button>
+		</div>
+		<div className="bridge-list">
+			{Object.entries(bridges).map(([server, bridge]) => <BridgeListEntry
+				key={server}
+				matrixClient={matrixClient}
+				server={server}
+				meta={bridge}
+				switchBridge={switchBridge}
+				active={viewingBridge === server}
+				showBotMXID={bridgeList.hasMultiple(bridge.whoami?.network.beeper_bridge_type)}
+			/>)}
+			<form className="new-bridge" onSubmit={addBridge}>
+				<input id="addbridge-server" type="text" placeholder="Bridge URL" name="server"/>
+				<div className="checkbox-wrapper">
+					<label htmlFor="addbridge-external">External </label>
+					<input id="addbridge-external" type="checkbox" name="external"/>
+				</div>
+				<button type="submit">Add bridge</button>
+			</form>
+		</div>
 		{viewingBridge && <BridgeStatusView
 			bridge={bridges[viewingBridge]}
 			setLoginInProgress={setLoginInProgress}
 		/>}
-		<br/>
-		<form onSubmit={addBridge}>
-			<label htmlFor="addbridge-server">Add bridge: </label>
-			<input id="addbridge-server" type="text" placeholder="Bridge URL" name="server" />
-			<label htmlFor="addbridge-external">External: </label>
-			<input id="addbridge-external" type="checkbox" name="external" />
-			<button type="submit">Add bridge</button>
-		</form>
-		<br/>
-		<button onClick={logout}>Logout</button>
-	</div>
+	</main>
 }
 
 export default MainView

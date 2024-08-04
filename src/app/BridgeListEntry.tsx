@@ -7,19 +7,27 @@ interface BridgeEntryProps {
 	server: string
 	meta: BridgeMeta
 	switchBridge: (server: string) => void
+	active: boolean
+	showBotMXID: boolean
 }
 
-const BridgeListEntry = ({ matrixClient, server, meta, switchBridge }: BridgeEntryProps) => {
+const BridgeListEntry = (
+	{ matrixClient, server, meta, switchBridge, active, showBotMXID }: BridgeEntryProps,
+) => {
 	const onClick = useCallback(() => switchBridge(server), [server, switchBridge])
+	const className = "bridge-list-entry" + (active ? " active" : "")
 	if (!meta.whoami) {
 		if (meta.error) {
-			return <div title={meta.error.message}>{server} ❌</div>
+			return <div className={className} title={meta.error.message}>{server} ❌</div>
 		}
-		return <div>Loading {server}...</div>
+		return <div className={className}>Loading {server}...</div>
 	}
-	return <button onClick={onClick}>
-		<img alt="" src={matrixClient.getMediaURL(meta.whoami.network.network_icon)} height={24}/>
-		{server}
+	return <button className={className} onClick={onClick} title={server}>
+		<img alt="" src={matrixClient.getMediaURL(meta.whoami.network.network_icon)}/>
+		<div className="bridge-list-name">
+			<span className="name">{meta.whoami.network.displayname}</span>
+			{showBotMXID && <small className="bridge-bot-id">{meta.whoami.bridge_bot}</small>}
+		</div>
 	</button>
 }
 
