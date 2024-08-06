@@ -16,3 +16,6 @@ max_line_length = 100
 
 [*.{yaml,yml}]
 indent_style = space
+
+[.github/workflows/*.yml]
+indent_size = 2
