@@ -22,7 +22,6 @@ export interface BridgeName {
 
 export type RemoteStateEvent =
 	"CONNECTING" |
-	"BACKFILLING" |
 	"CONNECTED" |
 	"TRANSIENT_DISCONNECT" |
 	"BAD_CREDENTIALS" |
@@ -36,11 +35,17 @@ export interface RemoteProfile {
 	avatar?: string
 }
 
-export interface RespWhoamiLogin {
+export interface BridgeState {
 	state_event: RemoteStateEvent
-	state_ts: number
-	state_reason?: string
-	state_info?: Record<string, unknown>
+	timestamp: number
+	error?: string
+	message?: string
+	reason?: string
+	info?: Record<string, unknown>
+}
+
+export interface RespWhoamiLogin {
+	state: BridgeState
 	id: string
 	name: string
 	profile?: RemoteProfile

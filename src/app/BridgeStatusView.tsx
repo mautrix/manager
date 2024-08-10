@@ -3,7 +3,6 @@ import type { BridgeMeta } from "../api/bridgelist"
 import type { LoginClient } from "../api/loginclient"
 import type { RespWhoamiLogin } from "../types/whoami"
 import type { MatrixClient } from "../api/matrixclient"
-import type { LoginInProgress } from "./MainView"
 import BridgeLoginView from "./BridgeLoginView"
 import "./BridgeStatusView.css"
 
@@ -20,7 +19,7 @@ interface UserLoginViewProps {
 
 const UserLoginView = ({ login, mxClient, doLogout }: UserLoginViewProps) => {
 	const [expandDetails, setExpandDetails] = useState(false)
-	const stateEvtClass = login.state_event.toLowerCase().replace("_", "-") || "unset"
+	const stateEvtClass = login.state?.state_event.toLowerCase().replace("_", "-") || "unset"
 	return <div className={`user-login-entry state-${stateEvtClass}`}>
 		<div className="header">
 			<div className="profile" onClick={() => setExpandDetails(!expandDetails)}>
@@ -30,9 +29,9 @@ const UserLoginView = ({ login, mxClient, doLogout }: UserLoginViewProps) => {
 			</div>
 			<div className="controls">
 				<span className={`login-state state-${stateEvtClass}`}>
-					{login.state_event || "NO STATE"}
+					{login.state?.state_event || "NO STATE"}
 				</span>
-				{login.state_event === "BAD_CREDENTIALS" &&
+				{login.state?.state_event === "BAD_CREDENTIALS" &&
 					<button className="relogin" data-login-id={login.id}>Relogin</button>}
 				<button className="logout" data-login-id={login.id} onClick={doLogout}>Logout
 				</button>
