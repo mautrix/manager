@@ -322,6 +322,8 @@ function removeExtraPromiseFields(obj: Record<string, unknown>) {
 	}
 }
 
+const persistentPartition = "persist:mautrix-webview-debug"
+
 function openWebview(
 	args: LoginCookiesParams,
 	parent: BrowserWindow,
@@ -335,6 +337,10 @@ function openWebview(
 		localStorageKeys,
 	} = parseLoginCookiesParams(args)
 
+	const partition = process.env.MAUTRIX_PERSISTENT_AUTH_WEBVIEW ? persistentPartition : Math.random().toString()
+	if (partition === persistentPartition) {
+		console.info("Using persistent partition for webview")
+	}
 	const webview = new BrowserWindow({
 		parent,
 		modal: true,
@@ -342,8 +348,7 @@ function openWebview(
 		icon: "icon.png",
 		webPreferences: {
 			sandbox: true,
-			// Create a new temporary session for each webview
-			partition: Math.random().toString(),
+			partition,
 		},
 	})
 	if (currentWebview) {

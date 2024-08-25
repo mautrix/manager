@@ -40,7 +40,7 @@ function loadIndexPage(search?: string) {
 
 const createWindow = () => {
 	mainWindow = new BrowserWindow({
-		width: 1280,
+		width: MAIN_WINDOW_VITE_DEV_SERVER_URL ? 1600 : 1280,
 		height: 800,
 		autoHideMenuBar: true,
 		icon: "icon.png",
