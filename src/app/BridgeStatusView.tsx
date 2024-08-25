@@ -66,7 +66,7 @@ const BridgeStatusView = ({ bridge, hidden }: BridgeViewProps) => {
 	}, [bridge])
 
 	if (!bridge.whoami) {
-		return <div>BridgeView spinner</div>
+		return <div className={`bridge-view ${hidden ? "hidden" : ""}`}>BridgeView spinner</div>
 	}
 
 	return <div className={`bridge-view ${hidden ? "hidden" : ""}`}>
