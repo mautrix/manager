@@ -65,6 +65,16 @@ const createWindow = () => {
 		})
 	})
 
+	// Force-allow cross-origin requests, particularly for development mode,
+	// where the file is served from localhost
+	mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+		const responseHeaders = details.responseHeaders || {};
+		responseHeaders["access-control-allow-origin"] = ["*"]
+		callback({
+			responseHeaders,
+		})
+	})
+
 	loadIndexPage()
 	if (process.env.NODE_ENV === "development") {
 		mainWindow.webContents.openDevTools()
