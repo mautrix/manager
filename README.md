@@ -46,3 +46,7 @@ list of an already-external server.
 For bridges on external servers, the manager will generate an OpenID token and
 exchange it for a temporary bridge-specific auth token rather than sending your
 Matrix access token to the bridge.
+
+## Running the arm64 Built Binary
+
+To run the arm64 built binary on M1 and higher Macs, after installing mautrix-manager.app in /Applications, enter the following command in terminal: `xattr -d com.apple.quarantine /Applications/mautrix-manager.app`.
