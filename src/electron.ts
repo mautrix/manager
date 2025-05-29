@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, shell } from "electron"
 import path from "path"
 import "./webview.ts"
 import type { AccessTokenChangedParams } from "./preload"
+import { getSearch } from "./util/urlParse"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -89,8 +90,9 @@ if (!app.requestSingleInstanceLock()) {
 		}
 
 		const arg = commandLine.pop()
-		if (arg?.startsWith("mautrix-manager://sso?")) {
-			loadIndexPage(arg.replace("mautrix-manager://sso?", ""))
+		const search = getSearch(arg)
+		if (search){
+			loadIndexPage(search)
 		}
 	})
 
@@ -109,8 +111,9 @@ if (!app.requestSingleInstanceLock()) {
 	app.whenReady().then(createWindow)
 
 	app.on("open-url", (event, url) => {
-		if (url.startsWith("mautrix-manager://sso?")) {
-			loadIndexPage(url.replace("mautrix-manager://sso?", ""))
+		const search = getSearch(url)
+		if (search){
+			loadIndexPage(search)
 		}
 	})
 }
