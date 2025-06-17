@@ -44,6 +44,9 @@ const LoginScreen = ({
 
 	const resolveHomeserver = useCallback(() => {
 		if (homeserverURL.startsWith("https://") || homeserverURL.startsWith("http://")) {
+			if (homeserverURL.endsWith("/")) {
+				setHomeserverURL(homeserverURL.slice(0, -1))
+			}
 			matrixClient.getLoginFlows().then(
 				resp => {
 					setLoginFlows(new Set(resp.flows.map(flow => flow.type)))
