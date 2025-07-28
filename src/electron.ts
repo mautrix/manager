@@ -3,9 +3,10 @@ import path from "path"
 import "./webview.ts"
 import type { AccessTokenChangedParams } from "./preload"
 import { getSearch } from "./util/urlParse"
+import started from "electron-squirrel-startup"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require("electron-squirrel-startup")) {
+if (started) {
 	app.quit()
 }
 
