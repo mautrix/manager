@@ -15,7 +15,7 @@ import type {
 } from "./types/loginstep"
 
 ipcMain.handle("mautrix:open-webview", (event, args: LoginCookiesParams) => {
-	console.log("Received open webview request from", event.senderFrame.url)
+	console.log("Received open webview request from", event.senderFrame?.url)
 	const parent = BrowserWindow.fromWebContents(event.sender)
 	if (!parent) {
 		throw new Error("No parent window found")
