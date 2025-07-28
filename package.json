@@ -23,17 +23,17 @@
 		"@electron-forge/plugin-vite": "^7.4.0",
 		"@electron-forge/publisher-github": "^7.4.0",
 		"@electron/fuses": "^1.8.0",
-		"@types/react": "^18.3.3",
-		"@types/react-dom": "^18.3.0",
-		"@typescript-eslint/eslint-plugin": "^5.0.0",
-		"@typescript-eslint/parser": "^5.0.0",
-		"electron": "31.2.1",
-		"eslint": "^8.0.1",
+		"@types/react": "^19.1.0",
+		"@types/react-dom": "^19.1.0",
+		"@typescript-eslint/eslint-plugin": "^8.0.0",
+		"@typescript-eslint/parser": "^8.0.0",
+		"electron": "37.2.4",
+		"eslint": "^9.32.0",
 		"eslint-plugin-import": "^2.25.0",
-		"eslint-plugin-react-hooks": "^4.6.2",
+		"eslint-plugin-react-hooks": "^5.2.0",
 		"ts-node": "^10.0.0",
-		"typescript": "~4.5.4",
-		"vite": "^5.0.12"
+		"typescript": "~5.8.3",
+		"vite": "^7.0.6"
 	},
 	"keywords": [],
 	"author": {
@@ -42,16 +42,10 @@
 	},
 	"license": "AGPL-3.0-or-later",
 	"dependencies": {
-		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc",
 		"electron-squirrel-startup": "^1.0.1",
-		"qrcode.react": "^3.1.0",
-		"react": "19.0.0-rc-8269d55d-20240802",
-		"react-dom": "19.0.0-rc-8269d55d-20240802",
-		"react-spinners": "^0.14.1"
-	},
-	"overrides": {
-		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc"
+		"qrcode.react": "^4.2.0",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
+		"react-spinners": "^0.17.0"
 	}
 }
