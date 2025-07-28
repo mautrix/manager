@@ -1,11 +1,12 @@
-name: Release app
+name: Build app
 
 on:
-  workflow_dispatch:
+  push:
 
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os:
           - name: Linux amd64
@@ -31,7 +32,11 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=dev
 
-      - name: Publish app
-        run: npm run publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build app
+        run: npm run make
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: out/make/
+          name: ${{ matrix.os.name }}
