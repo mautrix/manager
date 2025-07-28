@@ -438,6 +438,9 @@ function openWebview(
 		}
 	})
 
+	if (args.user_agent) {
+		webview.webContents.setUserAgent(args.user_agent)
+	}
 	webview.loadURL(args.url, { userAgent: args.user_agent })
 		.then(
 			() => {
