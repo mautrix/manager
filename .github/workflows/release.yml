@@ -18,6 +18,8 @@ jobs:
             image: windows-latest
     runs-on: ${{ matrix.os.image }}
     name: Build (${{ matrix.os.name }})
+    permissions:
+      contents: write
 
     steps:
       - name: Github checkout
