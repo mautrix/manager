@@ -1,7 +1,7 @@
 {
 	"name": "mautrix-manager",
 	"productName": "mautrix-manager",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "A frontend for managing mautrix bridges",
 	"main": ".vite/build/electron.js",
 	"scripts": {
