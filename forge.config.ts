@@ -17,6 +17,12 @@ const config: ForgeConfig = {
 			},
 		],
 		icon: "icon",
+		osxSign: {},
+		osxNotarize: process.env.APPLE_API_KEY_PATH ? {
+			appleApiKey: process.env.APPLE_API_KEY_PATH,
+			appleApiKeyId: process.env.APPLE_API_KEY_ID!,
+			appleApiIssuer: process.env.APPLE_API_ISSUER!,
+		} : undefined,
 	},
 	rebuildConfig: {},
 	makers: [
