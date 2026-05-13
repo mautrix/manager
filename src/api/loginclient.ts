@@ -83,7 +83,7 @@ export class LoginClient {
 			const closeWebview = () => window.mautrixAPI.closeWebview()
 			const removeListener = () => this.abortController.signal.removeEventListener("abort", closeWebview)
 			this.abortController.signal.addEventListener("abort", closeWebview)
-			if (!this.#step.cookies.user_agent) {
+			if (!this.#step.cookies.user_agent && !this.#step.cookies.url.includes(".google.com/")) {
 				this.#step.cookies.user_agent = baseChromeUserAgent
 			}
 			window.mautrixAPI.openWebview(this.#step.cookies).then(
