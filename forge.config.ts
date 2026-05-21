@@ -1,6 +1,7 @@
 import type { ForgeConfig } from "@electron-forge/shared-types"
 import { MakerSquirrel } from "@electron-forge/maker-squirrel"
 import { MakerDMG } from "@electron-forge/maker-dmg"
+import { MakerFlatpak } from "@electron-forge/maker-flatpak"
 import { MakerDeb } from "@electron-forge/maker-deb"
 import { PublisherGithub } from "@electron-forge/publisher-github"
 import { VitePlugin } from "@electron-forge/plugin-vite"
@@ -31,6 +32,15 @@ const config: ForgeConfig = {
 		new MakerDeb({
 			options: {
 				mimeType: ["x-scheme-handler/mautrix-manager"],
+				icon: "icon.png",
+			},
+		}),
+		new MakerFlatpak({
+			options: {
+				id: "net.maunium.electron",
+				productName: "mautrix-manager",
+				mimeType: ["x-scheme-handler/mautrix-manager"],
+				categories: ["Network"],
 				icon: "icon.png",
 			},
 		}),
