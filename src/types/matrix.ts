@@ -19,6 +19,14 @@ export type SpecVersion =
 	| "v1.9"
 	| "v1.10"
 	| "v1.11"
+	| "v1.12"
+	| "v1.13"
+	| "v1.14"
+	| "v1.15"
+	| "v1.16"
+	| "v1.17"
+	| "v1.18"
+	| "v1.19"
 
 export interface RespVersions {
 	unstable_features: Record<string, boolean>
