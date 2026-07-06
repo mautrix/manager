@@ -76,6 +76,11 @@ export class LoginClient {
 	cancel = () => {
 		this.abortController.abort()
 		this.onError(new Error("Login was cancelled"))
+		this.client.request(
+			"POST",
+			`/v3/login/cancel/${this.loginID}`,
+			{},
+		)
 	}
 
 	private processStep() {
