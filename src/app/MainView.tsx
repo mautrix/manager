@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import type { MatrixClient } from "../api/matrixclient"
 import { BridgeList, BridgeMap } from "../api/bridgelist"
+import type { MatrixClient } from "../api/matrixclient"
 import BridgeListEntry from "./BridgeListEntry"
 import BridgeStatusView from "./BridgeStatusView"
 import "./MainView.css"

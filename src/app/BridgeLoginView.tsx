@@ -1,13 +1,13 @@
+import { QRCodeSVG } from "qrcode.react"
 import React, { useCallback, useEffect, useState } from "react"
+import GridLoader from "react-spinners/GridLoader"
+import type { LoginClient } from "../api/loginclient"
 import type {
 	LoginDisplayAndWaitParams,
 	LoginInputDataField,
 	LoginInputFieldType,
 	LoginStepData,
 } from "../types/loginstep"
-import type { LoginClient } from "../api/loginclient"
-import { QRCodeSVG } from "qrcode.react"
-import GridLoader from "react-spinners/GridLoader"
 import "./BridgeLoginView.css"
 
 interface LoginViewProps {
@@ -118,7 +118,7 @@ const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel }: LoginStepProps
 
 const BridgeLoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewProps) => {
 	const [error, setError] = useState("")
-	const [loading, setLoading] = useState(client.loading)
+	const [, setLoading] = useState(client.loading)
 	const [step, setStep] = useState(client.step)
 	useEffect(() => {
 		const onError = (err: Error) => setError(err.message)

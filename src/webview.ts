@@ -1,8 +1,8 @@
 import {
-	ipcMain,
+	BeforeSendResponse,
 	BrowserWindow,
 	OnBeforeSendHeadersListenerDetails,
-	BeforeSendResponse,
+	ipcMain,
 } from "electron"
 import type {
 	LoginCookieField,
@@ -29,7 +29,7 @@ ipcMain.handle("mautrix:open-webview", (event, args: LoginCookiesParams) => {
 	})
 })
 
-ipcMain.handle("mautrix:close-webview", (event) => {
+ipcMain.handle("mautrix:close-webview", () => {
 	closeWebview()
 })
 

@@ -1,9 +1,9 @@
-import type { RespWhoami } from "../types/whoami"
 import type { RespLoginFlows, RespLogout, RespSubmitLogin } from "../types/login"
 import type { RespGetContactList, RespResolveIdentifier, RespStartChat } from "../types/startchat"
-import type { MatrixClient } from "./matrixclient"
-import { LoginClient } from "./loginclient"
+import type { RespWhoami } from "../types/whoami"
 import { BaseAPIClient } from "./baseclient"
+import { LoginClient } from "./loginclient"
+import type { MatrixClient } from "./matrixclient"
 
 export class ProvisioningClient extends BaseAPIClient {
 	declare readonly userID: string

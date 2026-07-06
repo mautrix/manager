@@ -1,0 +1,82 @@
+import js from "@eslint/js"
+import globals from "globals"
+import reactHooks from "eslint-plugin-react-hooks"
+import pluginImport from "eslint-plugin-import"
+import tseslint from "typescript-eslint"
+
+export default tseslint.config(
+	{ignores: ["dist"]},
+	{
+		extends: [js.configs.recommended, ...tseslint.configs.recommended],
+		files: ["**/*.{ts,tsx}"],
+		languageOptions: {
+			ecmaVersion: 2025,
+			globals: globals.browser,
+			parserOptions: {
+				warnOnUnsupportedTypeScriptVersion: false,
+			}
+		},
+		plugins: {
+			"react-hooks": reactHooks,
+			"import": pluginImport,
+		},
+		settings: {
+			"import/extensions": [".ts", ".tsx", ".css", ".svg"],
+		},
+		rules: {
+			...reactHooks.configs.recommended.rules,
+			"import/order": ["error", {
+				"newlines-between": "never",
+				"alphabetize": {"order": "asc", "orderImportKind": "asc"},
+				"named": true,
+				"warnOnUnassignedImports": true,
+			}],
+			"import/first": "error",
+			"import/newline-after-import": "error",
+			"indent": ["error", "tab", {
+				"FunctionDeclaration": {"parameters": "first"},
+				"FunctionExpression": {"parameters": "first"},
+				"CallExpression": {"arguments": "first"},
+				"ArrayExpression": "first",
+				"ObjectExpression": "first",
+				"ImportDeclaration": "first",
+			}],
+			"object-curly-newline": ["error", {
+				"consistent": true,
+			}],
+			"object-curly-spacing": ["error", "always", {
+				"arraysInObjects": false,
+				"objectsInObjects": false,
+			}],
+			"array-bracket-spacing": ["error", "never"],
+			"one-var-declaration-per-line": ["error", "initializations"],
+			"quotes": ["error", "double", {allowTemplateLiterals: true}],
+			"semi": ["error", "never"],
+			"curly": ["error", "all"],
+			"comma-dangle": ["error", "always-multiline"],
+			"max-len": ["error", 120],
+			"space-before-function-paren": ["error", {
+				"anonymous": "never",
+				"named": "never",
+				"asyncArrow": "always",
+			}],
+			"func-style": ["warn", "declaration", {"allowArrowFunctions": true}],
+			"id-length": ["warn", {"min": 1, "max": 40, "exceptions": ["i", "j", "x", "y", "_"]}],
+			"new-cap": ["warn", {
+				"newIsCap": true,
+				"capIsNew": true,
+			}],
+			"no-empty": ["error", {
+				"allowEmptyCatch": true,
+			}],
+			"eol-last": ["error", "always"],
+			"no-console": "off",
+			"@typescript-eslint/no-non-null-assertion": "off",
+			"react-hooks/immutability": "off",
+			"react-hooks/set-state-in-effect": "off",
+			"react-hooks/refs": "off",
+			"react-hooks/static-components": "off",
+			"react-hooks/purity": "off",
+		},
+	},
+)

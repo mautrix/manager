@@ -1,4 +1,3 @@
-import { BaseAPIClient } from "./baseclient"
 import {
 	ReqLogin,
 	RespLogin,
@@ -7,6 +6,7 @@ import {
 	RespVersions,
 	RespWhoami,
 } from "../types/matrix"
+import { BaseAPIClient } from "./baseclient"
 
 const mxcRegex = /^mxc:\/\/([^/]+?)\/([a-zA-Z0-9_-]+)$/
 

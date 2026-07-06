@@ -1,8 +1,8 @@
-import React, { MouseEvent, useCallback, useState } from "react"
+import { MouseEvent, useCallback, useState } from "react"
 import type { BridgeMeta } from "../api/bridgelist"
 import type { LoginClient } from "../api/loginclient"
-import type { RespWhoamiLogin } from "../types/whoami"
 import type { MatrixClient } from "../api/matrixclient"
+import type { RespWhoamiLogin } from "../types/whoami"
 import BridgeLoginView from "./BridgeLoginView"
 import "./BridgeStatusView.css"
 

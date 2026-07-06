@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback } from "react"
-import type { RespLogin } from "../types/matrix"
-import useInit from "../util/useInit"
-import { MatrixClient } from "../api/matrixclient"
+import { useCallback, useMemo, useState } from "react"
 import { APIError } from "../api/error"
 import TypedLocalStorage from "../api/localstorage"
-import MatrixLogin from "./MatrixLogin"
+import { MatrixClient } from "../api/matrixclient"
+import type { RespLogin } from "../types/matrix"
+import useInit from "../util/useInit"
 import MainView from "./MainView"
+import MatrixLogin from "./MatrixLogin"
 
 export interface Credentials {
 	user_id: string

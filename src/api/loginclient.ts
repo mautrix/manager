@@ -1,5 +1,5 @@
-import type { LoginStepData } from "../types/loginstep"
 import type { RespSubmitLogin } from "../types/login"
+import type { LoginStepData } from "../types/loginstep"
 import type { ProvisioningClient } from "./provisionclient"
 
 const baseChromeUserAgent = window.navigator.userAgent
@@ -118,7 +118,8 @@ export class LoginClient {
 		} else if (this.submitInProgress) {
 			throw new Error("Cannot submit multiple steps concurrently")
 		} else if (this.#step.type !== expectedType) {
-			throw new Error(`Mismatching step type for submit call, called ${expectedType} but current step is ${this.#step.type}`)
+			//eslint-disable-next-line max-len
+			throw new Error(`Mismatching step type for submit call, called ${expectedType}, but current step is ${this.#step.type}`)
 		}
 		this.onLoading(true)
 		this.client.request(

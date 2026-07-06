@@ -1,8 +1,8 @@
-import type { MatrixClient } from "./matrixclient"
 import type { RespMautrixWellKnown } from "../types/matrix"
 import type { RespWhoami } from "../types/whoami"
-import { ProvisioningClient } from "./provisionclient"
 import TypedLocalStorage from "./localstorage"
+import type { MatrixClient } from "./matrixclient"
+import { ProvisioningClient } from "./provisionclient"
 
 export class BridgeMeta {
 	constructor(

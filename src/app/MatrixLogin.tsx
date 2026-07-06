@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import type { RespClientWellKnown, RespLogin } from "../types/matrix"
 import type { MatrixClient } from "../api/matrixclient"
+import type { RespClientWellKnown, RespLogin } from "../types/matrix"
 import "./MatrixLogin.css"
 
 interface LoginScreenProps {

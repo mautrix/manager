@@ -1,9 +1,9 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron"
 import path from "path"
-import "./webview.ts"
+import { BrowserWindow, app, ipcMain, shell } from "electron"
+import started from "electron-squirrel-startup"
 import type { AccessTokenChangedParams } from "./preload"
 import { getSearch } from "./util/urlParse"
-import started from "electron-squirrel-startup"
+import "./webview.ts"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -13,12 +13,12 @@ if (started) {
 let homeserverURL = ""
 let accessToken = ""
 
-ipcMain.handle("mautrix:access-token-changed", (event, newDetails: AccessTokenChangedParams) => {
+ipcMain.handle("mautrix:access-token-changed", (_event, newDetails: AccessTokenChangedParams) => {
 	homeserverURL = newDetails.homeserverURL
 	accessToken = newDetails.accessToken
 })
 
-ipcMain.handle("mautrix:open-in-browser", (event, url: string) => {
+ipcMain.handle("mautrix:open-in-browser", (_event, url: string) => {
 	if (!url.startsWith("https://")) {
 		throw new Error("URL must start with https://")
 	}
@@ -84,9 +84,9 @@ if (process.defaultApp) {
 if (!app.requestSingleInstanceLock()) {
 	app.quit()
 } else {
-	app.on("second-instance", (event, commandLine, workingDirectory) => {
+	app.on("second-instance", (_event, commandLine) => {
 		if (mainWindow) {
-			if (mainWindow.isMinimized()) mainWindow.restore()
+			if (mainWindow.isMinimized()) {mainWindow.restore()}
 			mainWindow.focus()
 		}
 
@@ -111,7 +111,7 @@ if (!app.requestSingleInstanceLock()) {
 	})
 	app.whenReady().then(createWindow)
 
-	app.on("open-url", (event, url) => {
+	app.on("open-url", (_event, url) => {
 		const search = getSearch(url)
 		if (search){
 			loadIndexPage(search)
