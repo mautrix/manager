@@ -6,6 +6,7 @@ export type LoginStepData =
 	LoginStepUserInput |
 	LoginStepDisplayAndWait |
 	LoginStepCookies |
+	LoginStepWebAuthn |
 	LoginStepComplete
 
 interface baseLoginStep {
@@ -60,6 +61,16 @@ export interface LoginDisplayAndWaitQROrCodeParams {
 export type LoginStepCookies = baseLoginStep & {
 	type: "cookies",
 	cookies: LoginCookiesParams,
+}
+
+export type LoginStepWebAuthn = baseLoginStep & {
+	type: "webauthn",
+	webauthn: LoginWebAuthnParams,
+}
+
+export interface LoginWebAuthnParams {
+	url: string
+	publicKey: PublicKeyCredentialRequestOptionsJSON
 }
 
 export interface LoginCookiesParams {

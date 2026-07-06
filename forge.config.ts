@@ -9,13 +9,18 @@ import type { ForgeConfig } from "@electron-forge/shared-types"
 
 const config: ForgeConfig = {
 	packagerConfig: {
-		asar: true,
+		asar: {
+			unpack: "**/*.node",
+		},
 		protocols: [
 			{
 				name: "mautrix-manager",
 				schemes: ["mautrix-manager"],
 			},
 		],
+		extendInfo: {
+			NSBluetoothAlwaysUsageDescription: "mautrix-manager uses bluetooth for passkeys",
+		},
 		icon: "icon",
 		osxSign: {},
 		osxNotarize: process.env.APPLE_API_KEY_PATH ? {

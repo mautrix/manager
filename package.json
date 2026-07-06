@@ -41,6 +41,7 @@
 	},
 	"license": "AGPL-3.0-or-later",
 	"dependencies": {
+		"@beeper/webauthn-authenticator": "^0.2.1",
 		"electron-squirrel-startup": "^1.0.1",
 		"qrcode.react": "^4.2.0",
 		"react": "^19.1.0",

@@ -1,3 +1,4 @@
+import type { CableUiEvent } from "@beeper/webauthn-authenticator"
 import { QRCodeSVG } from "qrcode.react"
 import React, { useCallback, useEffect, useState } from "react"
 import GridLoader from "react-spinners/GridLoader"
@@ -21,6 +22,8 @@ interface LoginStepProps {
 	onSubmit: (data: Record<string, string>) => void
 	onCancel: () => void
 	onLoginComplete: () => void
+	cableState: string | null
+	cableQR: string | null
 }
 
 function loginInputFieldTypeToHTMLType(type: LoginInputFieldType): string {
@@ -64,7 +67,7 @@ const DisplayAndWaitStep = ({ params }: { params: LoginDisplayAndWaitParams }) =
 	case "code":
 		return <h1>{params.data}</h1>
 	case "qr":
-		return <QRCodeSVG value={params.data}/>
+		return <QRCodeSVG size={256} value={params.data}/>
 	case "nothing":
 		return <div>
 			<GridLoader color="var(--primary-color)"/>
@@ -76,8 +79,8 @@ const DisplayAndWaitStep = ({ params }: { params: LoginDisplayAndWaitParams }) =
 	}
 }
 
-const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel }: LoginStepProps) => {
-	const submitForm = useCallback((evt: React.FormEvent) => {
+const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel, cableState, cableQR }: LoginStepProps) => {
+	const submitForm = useCallback((evt: React.SubmitEvent) => {
 		evt.preventDefault()
 		const form = evt.currentTarget as HTMLFormElement
 		const data = Array.from(form.elements).reduce((acc, elem) => {
@@ -96,7 +99,9 @@ const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel }: LoginStepProps
 	case "display_and_wait":
 		return <div className="login-form type-display-and-wait">
 			<DisplayAndWaitStep params={step.display_and_wait}/>
-			<button className="cancel-button" onClick={onCancel}>Cancel</button>
+			<div className="login-form-buttons">
+				<button className="cancel-button" onClick={onCancel}>Cancel</button>
+			</div>
 		</div>
 	case "user_input":
 		return <form onSubmit={submitForm} className="login-form type-user-input">
@@ -109,6 +114,16 @@ const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel }: LoginStepProps
 				<button className="submit-button" type="submit">Submit</button>
 			</div>
 		</form>
+	case "webauthn":
+		return <div className="login-form type-webauthn">
+			Processing WebAuthn login{cableState ? <>: <code>{cableState}</code></> : "..."}
+			<div>
+				{cableQR ? <QRCodeSVG size={256} value={cableQR}/> : null}
+			</div>
+			<div className="login-form-buttons">
+				<button className="cancel-button" onClick={onCancel}>Cancel</button>
+			</div>
+		</div>
 	case "complete":
 		return <div className="login-form type-complete">
 			<button className="close-button" onClick={onLoginComplete}>Close</button>
@@ -120,10 +135,31 @@ const BridgeLoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewPr
 	const [error, setError] = useState("")
 	const [, setLoading] = useState(client.loading)
 	const [step, setStep] = useState(client.step)
+	const [cableState, setCableState] = useState<string | null>(null)
+	const [cableQR, setCableQR] = useState<string | null>(null)
 	useEffect(() => {
 		const onError = (err: Error) => setError(err.message)
 		client.listen(setStep, setLoading, onError)
-		return () => client.stopListen(setStep, setLoading, onError)
+		const cableUIListener = (evt: CustomEventInit<CableUiEvent | null>) => {
+			console.log("Received caBLE UI event", evt.detail)
+			if (!evt.detail) {
+				setCableState(null)
+				setCableQR(null)
+			} else if (evt.detail.event === "cableQrCode") {
+				setCableQR(evt.detail.url)
+			} else if (evt.detail.event === "dismissQrCode") {
+				setCableQR(null)
+			} else if (evt.detail.event === "cableStatusUpdate") {
+				setCableState(evt.detail.state)
+			} else {
+				console.warn("Unknown caBLE UI event", evt.detail.event)
+			}
+		}
+		window.addEventListener("mautrix:webauthn:cable-ui", cableUIListener)
+		return () => {
+			client.stopListen(setStep, setLoading, onError)
+			window.removeEventListener("mautrix:webauthn:cable-ui", cableUIListener)
+		}
 	}, [client])
 	const cancelLogin = useCallback(() => {
 		client.cancel()
@@ -144,6 +180,8 @@ const BridgeLoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewPr
 			onSubmit={client.submitUserInput}
 			onLoginComplete={onLoginComplete}
 			onCancel={cancelLogin}
+			cableState={cableState}
+			cableQR={cableQR}
 		/>
 	</div>
 }

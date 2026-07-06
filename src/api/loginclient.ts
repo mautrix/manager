@@ -95,6 +95,14 @@ export class LoginClient {
 				res => this.submitCookies(res.cookies),
 				this.onError,
 			).finally(removeListener)
+		} else if (this.#step.type === "webauthn") {
+			console.log("Starting WebAuthn login step", this.#step.webauthn)
+			window.mautrixAPI.doWebAuthn(this.#step.webauthn)
+				.then(this.submitWebAuthn, this.onError)
+				.finally(() => {
+					console.log("WebAuthn login step finished")
+					window.dispatchEvent(new CustomEvent("mautrix:webauthn:cable-ui", { detail: null }))
+				})
 		} else if (this.#step.type === "display_and_wait") {
 			this.wait()
 		} else if (this.#step.type === "complete") {
@@ -110,13 +118,17 @@ export class LoginClient {
 		return this.submitStep(params, "cookies")
 	}
 
+	submitWebAuthn = (params: AuthenticationResponseJSON) => {
+		return this.submitStep(params, "webauthn")
+	}
+
 	wait = () => {
 		return this.submitStep({}, "display_and_wait")
 	}
 
 	private submitStep<ParamsType>(
 		params: ParamsType,
-		expectedType: "user_input" | "cookies" | "display_and_wait",
+		expectedType: "user_input" | "cookies" | "display_and_wait" | "webauthn",
 	) {
 		if (this.abortController.signal.aborted) {
 			throw new Error("Login was cancelled")
@@ -126,6 +138,7 @@ export class LoginClient {
 			//eslint-disable-next-line max-len
 			throw new Error(`Mismatching step type for submit call, called ${expectedType}, but current step is ${this.#step.type}`)
 		}
+		console.log("Submitting", this.#step.step_id, this.#step.type)
 		this.onLoading(true)
 		this.client.request(
 			"POST",
@@ -152,6 +165,7 @@ export class LoginClient {
 	}
 
 	private onError = (err: Error | unknown) => {
+		console.error("Error in login", err)
 		this.onLoading(false)
 		if (this.#error) {
 			console.warn("Ignoring login error after previous error", err)

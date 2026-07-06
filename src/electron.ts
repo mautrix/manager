@@ -3,6 +3,7 @@ import { BrowserWindow, app, ipcMain, shell } from "electron"
 import started from "electron-squirrel-startup"
 import type { AccessTokenChangedParams } from "./preload"
 import { getSearch } from "./util/urlParse"
+import "./webauthn.ts"
 import "./webview.ts"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
