@@ -12,6 +12,16 @@ const config: ForgeConfig = {
 		asar: {
 			unpack: "**/*.node",
 		},
+		// Vite externalizes the native WebAuthn module, so Electron Packager must copy it.
+		// Disable its dependency pruning and explicitly retain only this package and its
+		// platform-specific optional dependency to avoid duplicating bundled modules.
+		prune: false,
+		ignore: (file) => Boolean(file && !(
+			file.startsWith("/.vite")
+			|| file === "/node_modules"
+			|| file === "/node_modules/@beeper"
+			|| file.startsWith("/node_modules/@beeper/webauthn-authenticator")
+		)),
 		protocols: [
 			{
 				name: "mautrix-manager",
