@@ -7,11 +7,17 @@ import { VitePlugin } from "@electron-forge/plugin-vite"
 import { PublisherGithub } from "@electron-forge/publisher-github"
 import type { ForgeConfig } from "@electron-forge/shared-types"
 
+const webauthnModulePath = "/node_modules/@beeper/webauthn-authenticator"
+
 const config: ForgeConfig = {
 	packagerConfig: {
 		asar: {
 			unpack: "**/*.node",
 		},
+		ignore: path => Boolean(path)
+			&& !path.startsWith("/.vite")
+			&& !webauthnModulePath.startsWith(path)
+			&& !path.startsWith(webauthnModulePath),
 		protocols: [
 			{
 				name: "mautrix-manager",
