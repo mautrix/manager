@@ -2,6 +2,7 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses"
 import { MakerDeb } from "@electron-forge/maker-deb"
 import { MakerDMG } from "@electron-forge/maker-dmg"
 import { MakerSquirrel } from "@electron-forge/maker-squirrel"
+import { MakerZIP } from "@electron-forge/maker-zip"
 import { FusesPlugin } from "@electron-forge/plugin-fuses"
 import { VitePlugin } from "@electron-forge/plugin-vite"
 import { PublisherGithub } from "@electron-forge/publisher-github"
@@ -39,6 +40,7 @@ const config: ForgeConfig = {
 	makers: [
 		new MakerSquirrel({}),
 		new MakerDMG({}),
+		new MakerZIP({}, ["linux"]),
 		new MakerDeb({
 			options: {
 				mimeType: ["x-scheme-handler/mautrix-manager"],
