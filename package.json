@@ -26,7 +26,7 @@
 		"@types/electron-squirrel-startup": "^1.0.2",
 		"@types/react": "^19.1.0",
 		"@types/react-dom": "^19.1.0",
-		"electron": "43.1.1",
+		"electron": "43.2.0",
 		"eslint": "^9.11.1",
 		"eslint-plugin-import": "^2.32.0",
 		"eslint-plugin-react-hooks": "^7.0.1",
