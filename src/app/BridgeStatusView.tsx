@@ -31,8 +31,8 @@ const UserLoginView = ({ login, mxClient, doLogout }: UserLoginViewProps) => {
 				<span className={`login-state state-${stateEvtClass}`}>
 					{login.state?.state_event || "NO STATE"}
 				</span>
-				{login.state?.state_event === "BAD_CREDENTIALS" &&
-					<button className="relogin" data-login-id={login.id}>Relogin</button>}
+				{/*login.state?.state_event === "BAD_CREDENTIALS" &&
+					<button className="relogin" data-login-id={login.id}>Relogin</button>*/}
 				<button className="logout" data-login-id={login.id} onClick={doLogout}>Logout
 				</button>
 			</div>
