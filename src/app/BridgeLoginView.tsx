@@ -124,6 +124,13 @@ const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel, cableState, cabl
 				<button className="cancel-button" onClick={onCancel}>Cancel</button>
 			</div>
 		</div>
+	case "client_http":
+		return <div className="login-form type-client-http">
+			Executing client-side HTTP request...
+			<div className="login-form-buttons">
+				<button className="cancel-button" onClick={onCancel}>Cancel</button>
+			</div>
+		</div>
 	case "complete":
 		return <div className="login-form type-complete">
 			<button className="close-button" onClick={onLoginComplete}>Close</button>

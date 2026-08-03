@@ -7,10 +7,12 @@ export type LoginStepData =
 	LoginStepDisplayAndWait |
 	LoginStepCookies |
 	LoginStepWebAuthn |
+	LoginStepClientHTTP |
 	LoginStepComplete
 
 interface baseLoginStep {
 	step_id: string
+	txn_id?: string
 	instructions?: string
 }
 
@@ -66,6 +68,28 @@ export type LoginStepCookies = baseLoginStep & {
 export type LoginStepWebAuthn = baseLoginStep & {
 	type: "webauthn",
 	webauthn: LoginWebAuthnParams,
+}
+
+export type LoginStepClientHTTP = baseLoginStep & {
+	type: "client_http",
+	client_http: LoginClientHTTPParams,
+}
+
+export interface LoginClientHTTPParams {
+	request_id: string
+	method: string
+	url: string
+	headers?: Record<string, string[]>
+	body?: string
+}
+
+export type LoginClientHTTPResponse = {
+	status_code: number
+	final_url?: string
+	headers?: Record<string, string[]>
+	body?: string
+} | {
+	error: string
 }
 
 export interface LoginWebAuthnParams {
