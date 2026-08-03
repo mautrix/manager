@@ -4,7 +4,7 @@ export interface ExtraParams {
 	signal?: AbortSignal
 	pathPrefix?: string
 	headers?: Record<string, string>
-	query?: Record<string, string>
+	query?: Record<string, string | undefined>
 }
 
 export class BaseAPIClient {
@@ -88,7 +88,9 @@ export class BaseAPIClient {
 		}
 		if (extraParams?.query) {
 			for (const [key, value] of Object.entries(extraParams.query)) {
-				url.searchParams.set(key, value)
+				if (value) {
+					url.searchParams.set(key, value)
+				}
 			}
 		}
 		const resp = await fetch(url.toString(), reqParams)

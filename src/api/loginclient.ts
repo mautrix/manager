@@ -156,7 +156,10 @@ export class LoginClient {
 			"POST",
 			`/v3/login/step/${this.loginID}/${this.#step.step_id}/${this.#step.type}`,
 			params,
-			{ signal: this.abortController.signal, query: { txn_id: this.#step.txn_id } },
+			{
+				signal: this.abortController.signal,
+				query: { txn_id: this.#step.txn_id },
+			},
 		).then(this.onStep, this.onError)
 	}
 
