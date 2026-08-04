@@ -34,6 +34,7 @@ export interface LoginInputDataField {
 	id: string
 	name: string
 	description?: string
+	default_value?: string
 	pattern?: string
 	options?: string[]
 }

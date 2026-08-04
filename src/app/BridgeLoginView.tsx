@@ -49,12 +49,17 @@ function loginInputFieldTypeToHTMLType(type: LoginInputFieldType): string {
 const LoginStepField = ({ field }: { field: LoginInputDataField }) => {
 	return <div className="login-form-field" title={field.description}>
 		<label htmlFor={`login-form-${field.id}`}>{field.name}</label>
-		{field.type === "select" && field.options ? <select id={`login-form-${field.id}`} name={field.id}>
+		{field.type === "select" && field.options ? <select
+			id={`login-form-${field.id}`}
+			name={field.id}
+			defaultValue={field.default_value}
+		>
 			{field.options.map(option => <option key={option} value={option}>{option}</option>)}
 		</select> : <input
 			id={`login-form-${field.id}`}
 			name={field.id}
 			type={loginInputFieldTypeToHTMLType(field.type)}
+			defaultValue={field.default_value}
 			placeholder={field.name}
 			pattern={field.pattern}
 		/>}
