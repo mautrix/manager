@@ -1,5 +1,5 @@
 import type { RespSubmitLogin } from "../types/login"
-import type { LoginStepData } from "../types/loginstep"
+import type { LoginClientHTTPResponse, LoginStepData } from "../types/loginstep"
 import type { ProvisioningClient } from "./provisionclient"
 
 const baseChromeUserAgent = window.navigator.userAgent
@@ -105,6 +105,18 @@ export class LoginClient {
 				})
 		} else if (this.#step.type === "display_and_wait") {
 			this.wait()
+		} else if (this.#step.type === "client_http") {
+			const headers = Object.fromEntries(Object.entries(this.#step.client_http.headers ?? {})
+				.map(([key, values]) => [key, values[0]]))
+			const body = this.#step.client_http.body ? Uint8Array.fromBase64(this.#step.client_http.body) : undefined
+			window.mautrixAPI.doClientHTTP(this.#step.client_http.url, {
+				method: this.#step.client_http.method,
+				headers,
+				body,
+			}).then(
+				resp => this.submitClientHTTP(resp),
+				err => this.submitClientHTTP({ error: err.toString() }),
+			)
 		} else if (this.#step.type === "complete") {
 			setTimeout(this.onCompleteRefresh, 200)
 		}
@@ -144,6 +156,27 @@ export class LoginClient {
 			"POST",
 			`/v3/login/step/${this.loginID}/${this.#step.step_id}/${this.#step.type}`,
 			params,
+			{
+				signal: this.abortController.signal,
+				query: { txn_id: this.#step.txn_id },
+			},
+		).then(this.onStep, this.onError)
+	}
+
+	private submitClientHTTP(resp: LoginClientHTTPResponse) {
+		if (this.abortController.signal.aborted) {
+			throw new Error("Login was cancelled")
+		} else if (this.submitInProgress) {
+			throw new Error("Cannot submit multiple steps concurrently")
+		} else if (this.#step.type !== "client_http") {
+			throw new Error("Mismatching step type for submitClientHTTP call")
+		}
+		console.log("Submitting client HTTP step", this.#step.step_id)
+		this.onLoading(true)
+		this.client.request(
+			"POST",
+			`/v3/login/client_http/${this.loginID}/${this.#step.txn_id}/${this.#step.client_http.request_id}`,
+			resp,
 			{ signal: this.abortController.signal },
 		).then(this.onStep, this.onError)
 	}

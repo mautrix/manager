@@ -1,33 +1,41 @@
 import { contextBridge, ipcRenderer } from "electron"
-import type { LoginCookieOutput, LoginCookiesParams, LoginWebAuthnParams } from "./types/loginstep"
+import type {
+	LoginClientHTTPResponse,
+	LoginCookieOutput,
+	LoginCookiesParams,
+	LoginWebAuthnParams,
+} from "./types/loginstep"
 
 export interface AccessTokenChangedParams {
 	homeserverURL: string
 	accessToken: string
 }
 
-contextBridge.exposeInMainWorld("mautrixAPI", {
-	openWebview: (params: LoginCookiesParams) =>
-		ipcRenderer.invoke("mautrix:open-webview", params),
+interface MautrixAPI {
+	openWebview: (params: LoginCookiesParams) => Promise<{ cookies: LoginCookieOutput }>
+	closeWebview: () => Promise<void>
+	doWebAuthn: (params: LoginWebAuthnParams) => Promise<AuthenticationResponseJSON>
+	doClientHTTP: (...params: Parameters<typeof fetch>) => Promise<LoginClientHTTPResponse>,
+	accessTokenChanged: (newDetails: AccessTokenChangedParams) => Promise<void>
+	openInBrowser: (url: string) => Promise<void>
+	isDevBuild: boolean,
+}
+
+const api: MautrixAPI = {
+	openWebview: params => ipcRenderer.invoke("mautrix:open-webview", params),
 	closeWebview: () => ipcRenderer.invoke("mautrix:close-webview"),
-	doWebAuthn: (params: LoginWebAuthnParams) =>
-		ipcRenderer.invoke("mautrix:webauthn", params),
-	accessTokenChanged: (newDetails: AccessTokenChangedParams) =>
-		ipcRenderer.invoke("mautrix:access-token-changed", newDetails),
-	openInBrowser: (url: string) => ipcRenderer.invoke("mautrix:open-in-browser", url),
+	doWebAuthn: params => ipcRenderer.invoke("mautrix:webauthn", params),
+	doClientHTTP: (url, init) => ipcRenderer.invoke("mautrix:client-http", url, init),
+	accessTokenChanged: newDetails => ipcRenderer.invoke("mautrix:access-token-changed", newDetails),
+	openInBrowser: url => ipcRenderer.invoke("mautrix:open-in-browser", url),
 	isDevBuild: process.env.NODE_ENV === "development",
-})
+}
+
+contextBridge.exposeInMainWorld("mautrixAPI", api)
 
 declare global {
 	interface Window {
-		mautrixAPI: {
-			openWebview: (params: LoginCookiesParams) => Promise<{ cookies: LoginCookieOutput }>
-			closeWebview: () => Promise<void>
-			doWebAuthn: (params: LoginWebAuthnParams) => Promise<AuthenticationResponseJSON>
-			accessTokenChanged: (newDetails: AccessTokenChangedParams) => Promise<void>
-			openInBrowser: (url: string) => Promise<void>
-			isDevBuild: boolean,
-		}
+		mautrixAPI: MautrixAPI
 	}
 }
 

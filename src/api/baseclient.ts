@@ -3,6 +3,8 @@ import { APIError } from "./error"
 export interface ExtraParams {
 	signal?: AbortSignal
 	pathPrefix?: string
+	headers?: Record<string, string>
+	query?: Record<string, string | undefined>
 }
 
 export class BaseAPIClient {
@@ -60,11 +62,12 @@ export class BaseAPIClient {
 		extraParams?: ExtraParams,
 	): Promise<ResponseType> {
 		if (method === "GET" || method === "HEAD") {
-			reqData = extraParams
+			extraParams = reqData as ExtraParams
+			reqData = undefined
 		}
 		const reqParams: RequestInit & { headers: Record<string, string> } = {
 			method,
-			headers: {},
+			headers: { ...extraParams?.headers },
 			signal: extraParams?.signal,
 		}
 		const token = await this.getToken()
@@ -82,6 +85,13 @@ export class BaseAPIClient {
 		}
 		if (this.loginID && !path.startsWith("/v3/login/")) {
 			url.searchParams.set("login_id", this.loginID)
+		}
+		if (extraParams?.query) {
+			for (const [key, value] of Object.entries(extraParams.query)) {
+				if (value) {
+					url.searchParams.set(key, value)
+				}
+			}
 		}
 		const resp = await fetch(url.toString(), reqParams)
 		let respData

@@ -2,6 +2,7 @@ import path from "path"
 import { BrowserWindow, app, ipcMain, shell } from "electron"
 import started from "electron-squirrel-startup"
 import type { AccessTokenChangedParams } from "./preload"
+import type { LoginClientHTTPResponse } from "./types/loginstep.ts"
 import { getSearch } from "./util/urlParse"
 import "./webauthn.ts"
 import "./webview.ts"
@@ -24,6 +25,20 @@ ipcMain.handle("mautrix:open-in-browser", (_event, url: string) => {
 		throw new Error("URL must start with https://")
 	}
 	return shell.openExternal(url)
+})
+
+ipcMain.handle("mautrix:client-http", async (
+	_event, url: string, init: Parameters<typeof fetch>[1],
+): Promise<LoginClientHTTPResponse> => {
+	console.log("Sending client HTTP request", init?.method, url)
+	const resp = await fetch(url, init)
+	console.log("Got response", resp.status, "to", url)
+	return {
+		status_code: resp.status,
+		headers: Object.fromEntries(resp.headers.entries().map(([key, value]) => [key, [value]])),
+		body: new Uint8Array(await resp.arrayBuffer()).toBase64(),
+		final_url: resp.url,
+	}
 })
 
 let mainWindow: BrowserWindow | undefined

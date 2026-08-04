@@ -42,7 +42,9 @@ export class ProvisioningClient extends BaseAPIClient {
 
 	async startLogin(flowID: string, refresh: () => void): Promise<LoginClient> {
 		const resp: RespSubmitLogin = await this.request(
-			"POST", `/v3/login/start/${encodeURIComponent(flowID)}`, {},
+			"POST", `/v3/login/start/${encodeURIComponent(flowID)}`, {}, {
+				query: { client_http: "1" },
+			},
 		)
 		return new LoginClient(this, resp, refresh)
 	}
