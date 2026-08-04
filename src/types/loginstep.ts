@@ -25,7 +25,9 @@ export interface LoginUserInputParams {
 	fields: LoginInputDataField[]
 }
 
-export type LoginInputFieldType = "username" | "phone_number" | "email" | "password" | "2fa_code"
+export type LoginInputFieldType =
+	"username" | "phone_number" | "email" | "password" | "2fa_code"
+	| "token" | "url" | "domain" | "select" | "captcha_code"
 
 export interface LoginInputDataField {
 	type: LoginInputFieldType
@@ -33,6 +35,7 @@ export interface LoginInputDataField {
 	name: string
 	description?: string
 	pattern?: string
+	options?: string[]
 }
 
 export type LoginStepDisplayAndWait = baseLoginStep & {

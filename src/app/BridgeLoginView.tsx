@@ -34,8 +34,14 @@ function loginInputFieldTypeToHTMLType(type: LoginInputFieldType): string {
 		return "tel"
 	case "password":
 		return "password"
+	case "url":
+		return "url"
 	case "username":
 	case "2fa_code":
+	case "token":
+	case "captcha_code":
+	case "domain":
+	default:
 		return "text"
 	}
 }
@@ -43,12 +49,15 @@ function loginInputFieldTypeToHTMLType(type: LoginInputFieldType): string {
 const LoginStepField = ({ field }: { field: LoginInputDataField }) => {
 	return <div className="login-form-field" title={field.description}>
 		<label htmlFor={`login-form-${field.id}`}>{field.name}</label>
-		<input
+		{field.type === "select" && field.options ? <select id={`login-form-${field.id}`} name={field.id}>
+			{field.options.map(option => <option key={option} value={option}>{option}</option>)}
+		</select> : <input
 			id={`login-form-${field.id}`}
 			name={field.id}
 			type={loginInputFieldTypeToHTMLType(field.type)}
 			placeholder={field.name}
-		/>
+			pattern={field.pattern}
+		/>}
 	</div>
 }
 
@@ -84,7 +93,7 @@ const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel, cableState, cabl
 		evt.preventDefault()
 		const form = evt.currentTarget as HTMLFormElement
 		const data = Array.from(form.elements).reduce((acc, elem) => {
-			if (elem instanceof HTMLInputElement) {
+			if (elem instanceof HTMLInputElement || elem instanceof HTMLSelectElement) {
 				acc[elem.name] = elem.value
 			}
 			return acc
