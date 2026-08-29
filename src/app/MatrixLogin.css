@@ -64,3 +64,14 @@ main.matrix-login {
 		padding: 1rem;
 	}
 }
+
+.oauth-device-login {
+	max-width: 20rem;
+	text-align: center;
+	line-height: 1.5;
+}
+
+.oauth-device-login code {
+	font-weight: bold;
+	user-select: all;
+}
