@@ -91,3 +91,37 @@ export interface RespLogin {
 	expires_in_ms?: number
 	well_known?: RespClientWellKnown
 }
+
+export interface RespAuthMetadata {
+	issuer: string
+	authorization_endpoint: string
+	token_endpoint: string
+	registration_endpoint?: string
+	device_authorization_endpoint?: string
+	revocation_endpoint?: string
+	grant_types_supported?: string[]
+	code_challenge_methods_supported?: string[]
+	response_types_supported?: string[]
+}
+
+export interface RespClientRegistration {
+	client_id: string
+	client_id_issued_at?: number
+}
+
+export interface RespDeviceAuthorization {
+	device_code: string
+	user_code: string
+	verification_uri: string
+	verification_uri_complete?: string
+	expires_in: number
+	interval?: number
+}
+
+export interface RespOAuthToken {
+	access_token: string
+	token_type: string
+	expires_in?: number
+	refresh_token?: string
+	scope?: string
+}

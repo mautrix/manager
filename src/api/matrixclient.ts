@@ -1,5 +1,6 @@
 import {
 	ReqLogin,
+	RespAuthMetadata,
 	RespLogin,
 	RespLoginFlows,
 	RespOpenIDToken,
@@ -65,6 +66,10 @@ export class MatrixClient extends BaseAPIClient {
 
 	getLoginFlows(): Promise<RespLoginFlows> {
 		return this.request("GET", "/v3/login")
+	}
+
+	getAuthMetadata(): Promise<RespAuthMetadata> {
+		return this.request("GET", "/v1/auth_metadata")
 	}
 
 	login(req: ReqLogin): Promise<RespLogin> {
