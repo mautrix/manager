@@ -85,6 +85,7 @@ export interface LoginClientHTTPParams {
 	url: string
 	headers?: Record<string, string[]>
 	body?: string
+	stream_id?: string
 }
 
 export type LoginClientHTTPResponse = {
@@ -92,6 +93,7 @@ export type LoginClientHTTPResponse = {
 	final_url?: string
 	headers?: Record<string, string[]>
 	body?: string
+	stream_id?: string
 } | {
 	error: string
 }
