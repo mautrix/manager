@@ -32,6 +32,16 @@ export class ProvisioningClient extends BaseAPIClient {
 		return new ProvisioningClient(this.baseURL, this.matrixClient, this.external, loginID)
 	}
 
+	getWebsocketTunnelURL(streamID: string): string {
+		const url = new URL(this.baseURL)
+		url.protocol = url.protocol === "http:" ? "ws" : "wss:"
+		url.pathname = `${url.pathname}${this.pathPrefix}/v3/login/client_websocket/${this.loginID}/${streamID}`
+		if (this.userID) {
+			url.searchParams.set("user_id", this.userID)
+		}
+		return url.toString()
+	}
+
 	whoami(signal?: AbortSignal): Promise<RespWhoami> {
 		return this.request("GET", "/v3/whoami", { signal })
 	}
@@ -43,10 +53,10 @@ export class ProvisioningClient extends BaseAPIClient {
 	async startLogin(flowID: string, refresh: () => void): Promise<LoginClient> {
 		const resp: RespSubmitLogin = await this.request(
 			"POST", `/v3/login/start/${encodeURIComponent(flowID)}`, {}, {
-				query: { client_http: "1" },
+				query: { client_http: "1", client_websocket: "2" },
 			},
 		)
-		return new LoginClient(this, resp, refresh)
+		return new LoginClient(this.withLogin(resp.login_id), resp, refresh)
 	}
 
 	logout(loginID: string | "all"): Promise<RespLogout> {
