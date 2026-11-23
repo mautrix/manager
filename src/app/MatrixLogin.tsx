@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import type { MatrixClient } from "../api/matrixclient"
-import type { RespClientWellKnown, RespLogin } from "../types/matrix"
+import { type DeviceLoginInfo, loginWithDeviceCode } from "../api/oauth"
+import type { RespAuthMetadata, RespClientWellKnown, RespLogin } from "../types/matrix"
 import "./MatrixLogin.css"
 
 interface LoginScreenProps {
@@ -17,6 +18,9 @@ const LoginScreen = ({
 	const [password, setPassword] = useState("")
 	const [error, setError] = useState("")
 	const [loginFlows, setLoginFlows] = useState<Set<string> | null>(null)
+	const [authMetadata, setAuthMetadata] = useState<RespAuthMetadata | null>(null)
+	const [deviceLogin, setDeviceLogin] = useState<DeviceLoginInfo | null>(null)
+	const [oauthInProgress, setOAuthInProgress] = useState(false)
 	const forceResolveImmediate = useRef(true)
 
 	const login = useCallback((evt: React.FormEvent) => {
@@ -41,17 +45,50 @@ const LoginScreen = ({
 				.catch(err => window.alert(`Failed to open SSO URL in browser: ${err}`))
 		}
 	}, [matrixClient])
+	const loginOAuth = useCallback(() => {
+		setError("")
+		setDeviceLogin(null)
+		setOAuthInProgress(true)
+		loginWithDeviceCode(matrixClient, setDeviceLogin).then(
+			resp => {
+				setOAuthInProgress(false)
+				onLoggedIn(resp)
+			},
+			err => {
+				setOAuthInProgress(false)
+				setDeviceLogin(null)
+				setError(`OAuth login failed: ${err}`)
+			},
+		)
+	}, [matrixClient, onLoggedIn])
 
 	const resolveHomeserver = useCallback(() => {
 		if (homeserverURL.startsWith("https://") || homeserverURL.startsWith("http://")) {
 			matrixClient.getLoginFlows().then(
 				resp => {
 					setLoginFlows(new Set(resp.flows.map(flow => flow.type)))
+					setAuthMetadata(null)
 					setError("")
 				},
-				err => {
-					setLoginFlows(null)
-					setError(`Failed to get login flows: ${err}`)
+				flowErr => {
+					matrixClient.getAuthMetadata().then(
+						meta => {
+							if (meta.device_authorization_endpoint) {
+								setLoginFlows(null)
+								setAuthMetadata(meta)
+								setError("")
+							} else {
+								setLoginFlows(null)
+								setAuthMetadata(null)
+								setError(`Failed to get login flows: ${flowErr}`)
+							}
+						},
+						() => {
+							setLoginFlows(null)
+							setAuthMetadata(null)
+							setError(`Failed to get login flows: ${flowErr}`)
+						},
+					)
 				},
 			)
 		} else if (homeserverURL) {
@@ -97,9 +134,10 @@ const LoginScreen = ({
 			onChange={evt => {
 				setHomeserverURL(evt.target.value)
 				setLoginFlows(null)
+				setAuthMetadata(null)
 			}}
 		/>
-		{!loginFlows?.size && <div tabIndex={0} className="tab-catcher" />}
+		{!loginFlows?.size && !authMetadata && <div tabIndex={0} className="tab-catcher" />}
 		{loginFlows?.has("m.login.password") && <form onSubmit={login}>
 			<input
 				type="text"
@@ -119,6 +157,16 @@ const LoginScreen = ({
 		</form>}
 		{loginFlows?.has("m.login.sso") && <>
 			<button className="mx-login-button" onClick={loginSSO}>SSO login</button>
+		</>}
+		{authMetadata && <>
+			<button className="mx-login-button" onClick={loginOAuth} disabled={oauthInProgress}>
+				{oauthInProgress ? "Waiting for approval…" : "Login with your homeserver"}
+			</button>
+			{deviceLogin && <div className="oauth-device-login">
+				Approve the login at <a href={deviceLogin.verificationURI} target="_blank" rel="noreferrer">
+					{deviceLogin.verificationURI}
+				</a> using the code <code>{deviceLogin.userCode}</code>.
+			</div>}
 		</>}
 		{error && <div className="error">
 			{error}
