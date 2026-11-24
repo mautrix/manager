@@ -108,15 +108,40 @@ export class LoginClient {
 		} else if (this.#step.type === "client_http") {
 			const headers = Object.fromEntries(Object.entries(this.#step.client_http.headers ?? {})
 				.map(([key, values]) => [key, values[0]]))
-			const body = this.#step.client_http.body ? Uint8Array.fromBase64(this.#step.client_http.body) : undefined
-			window.mautrixAPI.doClientHTTP(this.#step.client_http.url, {
-				method: this.#step.client_http.method,
-				headers,
-				body,
-			}).then(
-				resp => this.submitClientHTTP(resp),
-				err => this.submitClientHTTP({ error: err.toString() }),
-			)
+			if (
+				this.#step.client_http.method === "GET"
+				&& headers["Connection"] === "Upgrade"
+				&& headers["Upgrade"] === "websocket"
+				&& headers["Sec-Websocket-Key"]
+				&& headers["Sec-Websocket-Version"]
+				&& this.#step.client_http.stream_id
+			) {
+				const streamID = this.#step.client_http.stream_id
+				window.mautrixAPI.doClientWebsocket(
+					this.client.getWebsocketTunnelURL(streamID),
+					this.#step.client_http.url,
+					headers,
+				).then(
+					resp => {
+						if ("status_code" in resp) {
+							resp.stream_id = streamID
+						}
+						this.submitClientHTTP(resp)
+					},
+					err => this.submitClientHTTP({ error: err.toString() }),
+				)
+			} else {
+				const body = this.#step.client_http.body
+					? Uint8Array.fromBase64(this.#step.client_http.body) : undefined
+				window.mautrixAPI.doClientHTTP(this.#step.client_http.url, {
+					method: this.#step.client_http.method,
+					headers,
+					body,
+				}).then(
+					resp => this.submitClientHTTP(resp),
+					err => this.submitClientHTTP({ error: err.toString() }),
+				)
+			}
 		} else if (this.#step.type === "complete") {
 			setTimeout(this.onCompleteRefresh, 200)
 		}

@@ -16,6 +16,9 @@ interface MautrixAPI {
 	closeWebview: () => Promise<void>
 	doWebAuthn: (params: LoginWebAuthnParams) => Promise<AuthenticationResponseJSON>
 	doClientHTTP: (...params: Parameters<typeof fetch>) => Promise<LoginClientHTTPResponse>,
+	doClientWebsocket: (
+		tunnelURL: string, url: string, headers: Record<string, string>,
+	) => Promise<LoginClientHTTPResponse>,
 	accessTokenChanged: (newDetails: AccessTokenChangedParams) => Promise<void>
 	openInBrowser: (url: string) => Promise<void>
 	isDevBuild: boolean,
@@ -26,6 +29,8 @@ const api: MautrixAPI = {
 	closeWebview: () => ipcRenderer.invoke("mautrix:close-webview"),
 	doWebAuthn: params => ipcRenderer.invoke("mautrix:webauthn", params),
 	doClientHTTP: (url, init) => ipcRenderer.invoke("mautrix:client-http", url, init),
+	doClientWebsocket: (tunnelURL, url, headers) =>
+		ipcRenderer.invoke("mautrix:client-websocket", tunnelURL, url, headers),
 	accessTokenChanged: newDetails => ipcRenderer.invoke("mautrix:access-token-changed", newDetails),
 	openInBrowser: url => ipcRenderer.invoke("mautrix:open-in-browser", url),
 	isDevBuild: process.env.NODE_ENV === "development",

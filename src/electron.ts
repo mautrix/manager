@@ -1,5 +1,7 @@
+import https from "https"
+import { Socket } from "net"
 import path from "path"
-import { BrowserWindow, app, ipcMain, shell } from "electron"
+import { BrowserWindow, app, ipcMain, net, shell } from "electron"
 import started from "electron-squirrel-startup"
 import type { AccessTokenChangedParams } from "./preload"
 import type { LoginClientHTTPResponse } from "./types/loginstep.ts"
@@ -25,6 +27,81 @@ ipcMain.handle("mautrix:open-in-browser", (_event, url: string) => {
 		throw new Error("URL must start with https://")
 	}
 	return shell.openExternal(url)
+})
+
+ipcMain.handle("mautrix:client-websocket", (
+	_event, tunnelURL: string, url: string, headers: Record<string, string>,
+): Promise<LoginClientHTTPResponse> => {
+	const makeTunnel = (socket: Socket, head: Buffer | null) => {
+		socket.pause()
+		console.log("Opening client websocket tunnel to", tunnelURL)
+		const tunnel = new net.WebSocket(tunnelURL, {
+			headers: {
+				"Authorization": `Bearer ${accessToken}`,
+			},
+		})
+		tunnel.binaryType = "nodebuffer"
+		socket.on("data", data => {
+			console.log("Client websocket upstream -> tunnel message", data.length)
+			tunnel.send(data)
+		})
+		tunnel.onmessage = (msg: MessageEvent) => {
+			console.log("Client websocket tunnel -> upstream message", msg.data.length)
+			socket.write(msg.data)
+		}
+		tunnel.onopen = () => {
+			console.log("Client websocket tunnel opened")
+			if (head) {
+				console.log("Sending", head.length, "initial bytes")
+				tunnel.send(head)
+				head = null
+			}
+			socket.resume()
+		}
+		tunnel.onerror = (err: Error) => {
+			console.log("Client websocket tunnel errored", err)
+			socket.destroy()
+		}
+		tunnel.onclose = () => {
+			console.log("Client websocket tunnel closed")
+			if (!socket.closed) {
+				socket.end()
+				socket.setTimeout(2000, () => socket.destroy())
+			}
+		}
+		const closeTunnel = (err?: Error) => {
+			console.log("Client websocket upstream closed", err)
+			if (tunnel.readyState !== WebSocket.CLOSED && tunnel.readyState !== WebSocket.CLOSING) {
+				tunnel.close()
+			}
+		}
+		socket.on("close", closeTunnel)
+		socket.on("error", closeTunnel)
+	}
+	return new Promise<LoginClientHTTPResponse>((resolve, reject) => {
+		console.log("Opening client websocket to", url, "with headers", headers)
+		const wsReq = https.request(url, { headers })
+		wsReq.on("upgrade", (res, socket, head) => {
+			console.log("Client websocket upstream opened successfully", res.statusCode, headers)
+			resolve({
+				status_code: res.statusCode ?? 101,
+				headers: Object.fromEntries(Object.entries(res.headers).map(([name, value]) => {
+					if (value == undefined) {
+						value = [""]
+					} else if (typeof value === "string") {
+						value = [value]
+					}
+					return [name, value]
+				})),
+			})
+			makeTunnel(socket, head)
+		})
+		wsReq.on("error", err => {
+			console.log("Client websocket upstream errored", err)
+			reject(err)
+		})
+		wsReq.end()
+	})
 })
 
 ipcMain.handle("mautrix:client-http", async (
