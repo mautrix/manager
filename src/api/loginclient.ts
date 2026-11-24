@@ -6,6 +6,8 @@ const baseChromeUserAgent = window.navigator.userAgent
 	.replace(/ mautrix-manager\/\S+/, "")
 	.replace(/ Electron\/\S+/, "")
 
+export class LoginCancelledError extends Error {}
+
 export class LoginClient {
 	public readonly loginID: string
 	#step: LoginStepData
@@ -74,13 +76,18 @@ export class LoginClient {
 	}
 
 	cancel = () => {
+		if (this.abortController.signal.aborted) {
+			return
+		}
 		this.abortController.abort()
-		this.onError(new Error("Login was cancelled"))
+		this.#error = new LoginCancelledError("Login was cancelled")
+		this.onLoading(false)
+		this.errorListener?.(this.#error)
 		this.client.request(
 			"POST",
 			`/v3/login/cancel/${this.loginID}`,
 			{},
-		)
+		).catch(err => console.warn("Failed to cancel login", err))
 	}
 
 	private processStep() {
@@ -91,10 +98,17 @@ export class LoginClient {
 			if (!this.#step.cookies.user_agent && !this.#step.cookies.url.includes(".google.com/")) {
 				this.#step.cookies.user_agent = baseChromeUserAgent
 			}
-			window.mautrixAPI.openWebview(this.#step.cookies).then(
-				res => this.submitCookies(res.cookies),
-				this.onError,
-			).finally(removeListener)
+			window.mautrixAPI.openWebview(this.#step.cookies)
+				.finally(removeListener)
+				.then(res => {
+					if (this.abortController.signal.aborted) {
+						return
+					} else if (res.cookies === null) {
+						this.cancel()
+					} else {
+						this.submitCookies(res.cookies)
+					}
+				}, this.onError)
 		} else if (this.#step.type === "webauthn") {
 			console.log("Starting WebAuthn login step", this.#step.webauthn)
 			window.mautrixAPI.doWebAuthn(this.#step.webauthn)

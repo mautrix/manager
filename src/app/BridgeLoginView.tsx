@@ -2,7 +2,7 @@ import type { CableUiEvent } from "@beeper/webauthn-authenticator"
 import { QRCodeSVG } from "qrcode.react"
 import React, { useCallback, useEffect, useState } from "react"
 import GridLoader from "react-spinners/GridLoader"
-import type { LoginClient } from "../api/loginclient"
+import { LoginCancelledError, type LoginClient } from "../api/loginclient"
 import type {
 	LoginDisplayAndWaitParams,
 	LoginInputDataField,
@@ -154,12 +154,18 @@ const LoginStep = ({ step, onSubmit, onLoginComplete, onCancel, cableState, cabl
 
 const BridgeLoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewProps) => {
 	const [error, setError] = useState("")
-	const [, setLoading] = useState(client.loading)
+	const [loading, setLoading] = useState(client.loading)
 	const [step, setStep] = useState(client.step)
 	const [cableState, setCableState] = useState<string | null>(null)
 	const [cableQR, setCableQR] = useState<string | null>(null)
 	useEffect(() => {
-		const onError = (err: Error) => setError(err.message)
+		const onError = (err: Error) => {
+			if (err instanceof LoginCancelledError) {
+				onLoginCancel()
+			} else {
+				setError(err.message)
+			}
+		}
 		client.listen(setStep, setLoading, onError)
 		const cableUIListener = (evt: CustomEventInit<CableUiEvent | null>) => {
 			console.log("Received caBLE UI event", evt.detail)
@@ -181,26 +187,26 @@ const BridgeLoginView = ({ client, onLoginCancel, onLoginComplete }: LoginViewPr
 			client.stopListen(setStep, setLoading, onError)
 			window.removeEventListener("mautrix:webauthn:cable-ui", cableUIListener)
 		}
-	}, [client])
-	const cancelLogin = useCallback(() => {
-		client.cancel()
-		onLoginCancel()
 	}, [client, onLoginCancel])
 
 	let instructionsToRender = step.instructions
+	const finishingBrowserLogin = step.type === "cookies" && loading && !error
 	if (step.type === "cookies") {
-		instructionsToRender = "Please complete the login in the webview"
+		instructionsToRender = finishingBrowserLogin
+			? "Finishing sign-in. Keep mautrix-manager open."
+			: "Finish signing in in the browser window."
 	}
 
 	return <div className="bridge-login-view">
-		<div className="login-instructions">
-			{error ? `Login failed :( ${error}` : instructionsToRender}
+		<div className="login-instructions" role="status">
+			{finishingBrowserLogin && <span className="login-spinner" aria-hidden="true"/>}
+			<span>{error ? `Login failed :( ${error}` : instructionsToRender}</span>
 		</div>
 		<LoginStep
 			step={step}
 			onSubmit={client.submitUserInput}
 			onLoginComplete={onLoginComplete}
-			onCancel={cancelLogin}
+			onCancel={client.cancel}
 			cableState={cableState}
 			cableQR={cableQR}
 		/>

@@ -20,7 +20,7 @@ ipcMain.handle("mautrix:open-webview", (event, args: LoginCookiesParams) => {
 	if (!parent) {
 		throw new Error("No parent window found")
 	}
-	return new Promise<{ cookies: LoginCookieOutput }>((resolve, reject) => {
+	return new Promise<{ cookies: LoginCookieOutput | null }>((resolve, reject) => {
 		try {
 			openWebview(args, parent, resolve, reject)
 		} catch (err) {
@@ -327,7 +327,7 @@ const persistentPartition = "persist:mautrix-webview-debug"
 function openWebview(
 	args: LoginCookiesParams,
 	parent: BrowserWindow,
-	resolve: (output: { cookies: LoginCookieOutput }) => void,
+	resolve: (output: { cookies: LoginCookieOutput | null }) => void,
 	reject: (err: Error) => void,
 ) {
 	const {
@@ -343,7 +343,8 @@ function openWebview(
 	}
 	const webview = new BrowserWindow({
 		parent,
-		modal: true,
+		// macOS modal children are sheets without a close button.
+		modal: process.platform !== "darwin",
 		autoHideMenuBar: true,
 		icon: "icon.png",
 		webPreferences: {
@@ -359,6 +360,9 @@ function openWebview(
 	const output: LoginCookieOutput = {}
 	let resolved = false
 	const checkIfAllFieldsPresent = () => {
+		if (resolved) {
+			return
+		}
 		for (const field of requiredFields) {
 			if (!(field in output)) {
 				console.log("Still missing", field)
@@ -422,9 +426,22 @@ function openWebview(
 		}
 		console.log("Webview closed")
 		if (!resolved) {
-			reject(new Error("Webview closed before all fields were found"))
+			resolved = true
+			resolve({ cookies: null })
 		}
 	})
+
+	if (process.platform === "darwin") {
+		webview.webContents.on("before-input-event", (event, input) => {
+			if (
+				input.type === "keyDown" && input.meta && !input.shift
+				&& !input.alt && !input.control && input.key.toLowerCase() === "w"
+			) {
+				event.preventDefault()
+				webview.destroy()
+			}
+		})
+	}
 
 	webview.webContents.setWindowOpenHandler((details) => {
 		console.log("Overriding window open", details.url, "with a redirect")
