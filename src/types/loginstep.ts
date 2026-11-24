@@ -104,6 +104,7 @@ export interface LoginWebAuthnParams {
 export interface LoginCookiesParams {
 	url: string
 	user_agent?: string
+	wait_for_url_pattern?: string
 	fields: LoginCookieField[]
 	extract_js?: string
 }

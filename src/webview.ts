@@ -191,6 +191,7 @@ function makeRequestWatcher(
 		return null
 	}
 	return (details, callback) => {
+		let headers: Map<string, string> | undefined
 		let parsedRequestBody: parsedRequestBody | undefined | null
 		const getRequestBody = () => {
 			if (parsedRequestBody === undefined) {
@@ -205,8 +206,12 @@ function makeRequestWatcher(
 			}
 			for (const { field, source } of fieldList.fields) {
 				if (source.type == "request_header") {
-					if (details.requestHeaders && source.name in details.requestHeaders) {
-						output[field.id] = details.requestHeaders[source.name]
+					headers ??= new Map(Object.entries(details.requestHeaders ?? {}).map(
+						([name, value]) => [name.toLowerCase(), value],
+					))
+					const value = headers.get(source.name.toLowerCase())
+					if (value !== undefined) {
+						output[field.id] = value
 						foundAny = true
 					}
 				} else if (source.type == "request_body") {
@@ -231,10 +236,10 @@ function makeRequestWatcher(
 				}
 			}
 		}
+		callback({})
 		if (foundAny) {
 			checkIfAllFieldsPresent()
 		}
-		callback({})
 	}
 }
 
@@ -337,6 +342,7 @@ function openWebview(
 		localStorageKeys,
 	} = parseLoginCookiesParams(args)
 
+	const waitForURL = args.wait_for_url_pattern ? new RegExp(args.wait_for_url_pattern) : null
 	const partition = process.env.MAUTRIX_PERSISTENT_AUTH_WEBVIEW ? persistentPartition : Math.random().toString()
 	if (partition === persistentPartition) {
 		console.info("Using persistent partition for webview")
@@ -360,7 +366,7 @@ function openWebview(
 	const output: LoginCookieOutput = {}
 	let resolved = false
 	const checkIfAllFieldsPresent = () => {
-		if (resolved) {
+		if (resolved || (waitForURL && !waitForURL.test(webview.webContents.getURL()))) {
 			return
 		}
 		for (const field of requiredFields) {
@@ -387,6 +393,15 @@ function openWebview(
 	)
 	if (requestWatcher) {
 		webview.webContents.session.webRequest.onBeforeSendHeaders(requestWatcher)
+	}
+
+	if (waitForURL) {
+		webview.webContents.on("did-navigate", checkIfAllFieldsPresent)
+		webview.webContents.on("did-navigate-in-page", (_event, _url, isMainFrame) => {
+			if (isMainFrame) {
+				checkIfAllFieldsPresent()
+			}
+		})
 	}
 
 	const cookieWatcher = makeCookieWatcher(
