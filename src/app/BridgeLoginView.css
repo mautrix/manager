@@ -31,6 +31,33 @@ div.bridge-login-view {
 	}
 }
 
+.login-instructions {
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+}
+
+.login-spinner {
+	box-sizing: border-box;
+	width: 1em;
+	height: 1em;
+	flex: none;
+	border: 2px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+	border-top-color: var(--primary-color);
+	border-radius: 50%;
+	animation: login-spin .8s linear infinite;
+}
+
+@keyframes login-spin {
+	to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.login-spinner {
+		animation: none;
+	}
+}
+
 div.login-form.type-complete {
 	display: flex;
 	justify-content: right;

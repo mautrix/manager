@@ -12,7 +12,7 @@ export interface AccessTokenChangedParams {
 }
 
 interface MautrixAPI {
-	openWebview: (params: LoginCookiesParams) => Promise<{ cookies: LoginCookieOutput }>
+	openWebview: (params: LoginCookiesParams) => Promise<{ cookies: LoginCookieOutput | null }>
 	closeWebview: () => Promise<void>
 	doWebAuthn: (params: LoginWebAuthnParams) => Promise<AuthenticationResponseJSON>
 	doClientHTTP: (...params: Parameters<typeof fetch>) => Promise<LoginClientHTTPResponse>,
